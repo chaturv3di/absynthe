@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.org/chaturv3di/absynthe.svg?branch=develop)](https://www.travis-ci.org/chaturv3di/absynthe)
+
 # absynthe: A (branching) Behavior Synthesizer
 
 ## Motivation
