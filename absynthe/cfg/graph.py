@@ -155,7 +155,6 @@ class Graph(object):
         fileContent.append("}")
 
         fileText = "".join(fileContent)
-        print(fileText)
         fp.write(fileText)
         fp.flush()
         return

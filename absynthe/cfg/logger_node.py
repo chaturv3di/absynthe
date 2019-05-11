@@ -129,7 +129,7 @@ class LoggerNode(Node):
         return self._coreNode.getSuccessorAtRandom()
 
     @abstractmethod
-    def genInfo(self, timeStamp: str, params: List[str]) -> str:
+    def logInfo(self, timeStamp: str, params: List[str]) -> str:
         """
         Create a log message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to
@@ -147,7 +147,7 @@ class LoggerNode(Node):
         pass
 
     @abstractmethod
-    def genError(self, timeStamp: str, params: List[str]) -> str:
+    def logError(self, timeStamp: str, params: List[str]) -> str:
         """
         Create an error message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to be
@@ -169,9 +169,6 @@ class SimpleLoggerNode(LoggerNode):
 
     _minMesgLen = 1
     _maxMesgLen = 4
-    _mesgPrefixes = ["SimpleLoggerNode: ",
-                     "absynthe.cfg.SimpleLoggerNode: ",
-                     "Simple Log Mesg Generator: "]
 
     def __init__(self, id: str, **kwargs: str) -> None:
         super().__init__(id, **kwargs)
@@ -180,9 +177,12 @@ class SimpleLoggerNode(LoggerNode):
         return
 
     def _createLoglineSignature(self, id: str, mesgAnnotation: str = "") -> str:
+        """
+        Create and store a fixed signature that would be emitted with every log
+        message. This node has different fixed signatures for info and error.
+        """
         self._mesgLen = randint(self._minMesgLen, self._maxMesgLen)
-        prefixIdx = randint(0, len(self._mesgPrefixes) - 1)
-        fixedMesgList = [self._mesgPrefixes[prefixIdx], mesgAnnotation]
+        fixedMesgList = [mesgAnnotation]
 
         mesgInfixes = [self._id, self._coreNode.getID()]
         mesgInfix = mesgAnnotation + "-" if not mesgAnnotation == "" else None
@@ -197,10 +197,16 @@ class SimpleLoggerNode(LoggerNode):
 
         return "".join(fixedMesgList)
 
-    def genInfo(self, timeStamp: str, params: List[str]) -> str:
+    def logInfo(self, timeStamp: str, params: List[str]) -> str:
+        """
+        Override abstract method of super class
+        """
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_INFO)
 
-    def genError(self, timeStamp: str, params: List[str]) -> str:
+    def logError(self, timeStamp: str, params: List[str]) -> str:
+        """
+        Override abstract method of super class
+        """
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_ERR)
 
     def _createMesg(self, timeStamp: str,

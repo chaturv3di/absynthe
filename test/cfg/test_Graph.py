@@ -58,7 +58,6 @@ class GraphTest(unittest.TestCase):
     def test_graphDump(self):
         filePath = os.path.dirname("../resources")+"/Graph_test_graphDump.gv"
         testGraph = self._buildDummyGraph()
-        print("Will write to: ", filePath)
         with open(filePath, "w") as ofp:
             testGraph.dumpDotFie(ofp)
         return
