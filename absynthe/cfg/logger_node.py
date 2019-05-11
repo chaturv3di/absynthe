@@ -31,9 +31,6 @@ class LoggerNode(Node):
     # Some nodes ignore flow params while spitting out the log message.
     key_ignoreFlowParams = "ignoreFlowParams"
 
-    # Other static variables
-    ListOfStr = List[str]
-
     # Type of messages supported
     MESG_TYPE_INFO = "INFO"
     MESG_TYPE_ERR = "ERROR"
@@ -132,7 +129,7 @@ class LoggerNode(Node):
         return self._coreNode.getSuccessorAtRandom()
 
     @abstractmethod
-    def genInfo(self, timeStamp: str, params: ListOfStr) -> str:
+    def genInfo(self, timeStamp: str, params: List[str]) -> str:
         """
         Create a log message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to
@@ -150,7 +147,7 @@ class LoggerNode(Node):
         pass
 
     @abstractmethod
-    def genError(self, timeStamp: str, params: ListOfStr) -> str:
+    def genError(self, timeStamp: str, params: List[str]) -> str:
         """
         Create an error message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to be
@@ -200,14 +197,14 @@ class SimpleLoggerNode(LoggerNode):
 
         return "".join(fixedMesgList)
 
-    def genInfo(self, timeStamp: str, params: LoggerNode.ListOfStr) -> str:
+    def genInfo(self, timeStamp: str, params: List[str]) -> str:
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_INFO)
 
-    def genError(self, timeStamp: str, params: LoggerNode.ListOfStr) -> str:
+    def genError(self, timeStamp: str, params: List[str]) -> str:
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_ERR)
 
     def _createMesg(self, timeStamp: str,
-                    params: LoggerNode.ListOfStr,
+                    params: List[str],
                     mesgType: str = LoggerNode.MESG_TYPE_INFO) -> str:
         mesgList = list()
         if mesgType == LoggerNode.MESG_TYPE_INFO:

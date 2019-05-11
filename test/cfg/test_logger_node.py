@@ -34,3 +34,7 @@ class SimpleLoggerNodeTest(unittest.TestCase):
         self.assertEqual(testLogger.genError("11-May-2019, 11:31:13:2323", params),
                          testLogger.genError("11-May-2019, 11:31:13:2323", params))
         return
+
+
+if __name__ == '__main__':
+    unittest.main()
