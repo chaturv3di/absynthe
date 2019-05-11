@@ -114,7 +114,6 @@ class Node(ABC):
         except IndexError as error:
             print("Illegal argument for index:", index, file=stderr)
             raise error
-        return None
 
     @abstractmethod
     def getSuccessorAtRandom(self) -> object:
