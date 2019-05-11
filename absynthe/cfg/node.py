@@ -78,6 +78,11 @@ class Node(ABC):
         distribution. In particular, the successor Nodes toward the
         centre of the list of successors would have the maximum
         probability of selection in that case.
+
+        Args:
+          successor(Node): A successor node to be added. `None` is a valid
+            successor, since it denotes that this node could be a leaf node.
+            Note that a node can have both `None` and non-`None` successors.
         """
         pass
 
@@ -136,8 +141,15 @@ class UniformNode(Node):
 
     def addSuccessor(self, successor: Node):
         """
-        Appends a successor Node to the list of successors.
+        Appends a successor Node to the list of successors. Ensures that
+        *at most one* successor is `None`.
         """
+        if successor is None:
+            try:
+                _ = self._successors.index(None)
+                return
+            except ValueError:
+                pass
         self._successors.append(successor)
         return
 
@@ -153,6 +165,9 @@ class UniformNode(Node):
         return super().getSuccessorAt(index)
 
     def getSuccessorAtRandom(self) -> Node:
+        if 0 == self.getNumSuccessors():
+            return None
+
         randomIndex = randint(0, self.getNumSuccessors() - 1)
         return self._successors[randomIndex]
 
