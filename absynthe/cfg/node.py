@@ -1,4 +1,5 @@
 from __future__ import print_function
+from sys import stderr
 
 # Imports for Node
 from abc import ABC, abstractmethod
@@ -14,7 +15,7 @@ class Node(ABC):
     governing the choice of which successor to return for traversal.
     """
 
-    def __init__(self, id: str, **kwargs: str):
+    def __init__(self, id: str, **kwargs: str) -> None:
         """
         Args:
           id(str): An identifier for this node. It would help to
@@ -106,7 +107,7 @@ class Node(ABC):
         try:
             return self._successors[index]
         except IndexError as error:
-            print("Illegal argument for index:", index)
+            print("Illegal argument for index:", index, file=stderr)
             raise error
         return None
 
@@ -129,7 +130,7 @@ class UniformNode(Node):
     *uniformly at random*.
     """
 
-    def __init__(self, id, **kwargs):
+    def __init__(self, id, **kwargs) -> None:
         super().__init__(id, **kwargs)
         return
 

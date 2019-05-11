@@ -1,4 +1,5 @@
 from __future__ import print_function
+from sys import stderr
 
 from .node import Node
 from random import randint
@@ -18,7 +19,7 @@ class Graph(object):
           unique IDs to count the number of nodes.
     """
 
-    def __init__(self, id: str, numRoots: int = 1):
+    def __init__(self, id: str, numRoots: int = 1) -> None:
         """
         Constructor for the class.
 
@@ -61,7 +62,8 @@ class Graph(object):
         except IndexError as error:
             print("Illegal argument for index:", index,
                   "Number of root nodes:", len(self._roots),
-                  "Expected number of root nodes:", self._numRoots)
+                  "Expected number of root nodes:", self._numRoots,
+                  file=stderr)
             raise error
         return None
 

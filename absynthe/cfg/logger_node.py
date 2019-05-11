@@ -38,7 +38,7 @@ class LoggerNode(Node):
     MESG_TYPE_INFO = "INFO"
     MESG_TYPE_ERR = "ERROR"
 
-    def __init__(self, id: str, **kwargs: str):
+    def __init__(self, id: str, **kwargs: str) -> None:
         """
         Constructor that internally creates an object of a concrete
         subclass of Node and assigns it to the member field _coreNode. The
@@ -176,7 +176,7 @@ class SimpleLoggerNode(LoggerNode):
                      "absynthe.cfg.SimpleLoggerNode: ",
                      "Simple Log Mesg Generator: "]
 
-    def __init__(self, id: str, **kwargs: str):
+    def __init__(self, id: str, **kwargs: str) -> None:
         super().__init__(id, **kwargs)
         self._fixedInfoMesg = self._createLoglineSignature(id)
         self._fixedErrMesg = self._createLoglineSignature(id, "ERROR")
