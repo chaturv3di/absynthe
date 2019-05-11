@@ -134,6 +134,11 @@ class Graph(object):
         return
 
     def dumpDotFie(self, fp: TextIO) -> None:
+        """
+        Creates a file that could be visualised using graphviz's DOT program.
+        Args:
+          fp(typing.TextIO): A text file stream that can be written to.
+        """
         self._nodeDict = dict()
         transitionList: List[Tuple[str, str]] = list()
 
