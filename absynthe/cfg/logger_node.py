@@ -7,6 +7,7 @@ from abc import abstractmethod
 from sys import stderr
 from typing import List
 from random import randint
+from importlib import import_module
 
 
 class LoggerNode(Node):
@@ -26,13 +27,10 @@ class LoggerNode(Node):
     # of this class.
 
     # To specify the class of the core node
-    key_coreClassName = "coreClassName"
+    KW_CORE_CLASS_NAME = "CORE_CLASS_NAME"
 
     # Some nodes ignore flow params while spitting out the log message.
-    key_ignoreFlowParams = "ignoreFlowParams"
-
-    # Other static variables
-    ListOfStr = List[str]
+    KW_IGNORE_PARAMS = "IGNORE_PARAMS"
 
     # Type of messages supported
     MESG_TYPE_INFO = "INFO"
@@ -64,16 +62,16 @@ class LoggerNode(Node):
         """
         super().__init__(id, **kwargs)
         coreID = id + "_Core"
-        nodeModule = __import__("absynthe.cfg.node")
+        nodeModule = import_module("absynthe.cfg.node")
 
         # 1. Try to initialise the core node of this object
         self._coreNode: Node = None
         try:
-            className = kwargs[LoggerNode.key_coreClassName]
+            className = kwargs[LoggerNode.KW_CORE_CLASS_NAME]
             self._coreNode = getattr(nodeModule, className)(coreID, **kwargs)
         except KeyError as ke:
             # A core class name is mandatory...
-            print(type(self).__name__, "ERROR: Keyword LoggerNode.key_coreClassName not provided.",
+            print(type(self).__name__, "ERROR: Keyword LoggerNode.KW_CORE_CLASS_NAME not provided",
                   className, file=stderr)
             raise ke
         except AttributeError as ae:
@@ -90,7 +88,7 @@ class LoggerNode(Node):
         # 2. Set other params used by methods that print out log messages
         self._ignoreParams = False
         try:
-            ignoreParams = kwargs[LoggerNode.key_ignoreFlowParams].lower()
+            ignoreParams = kwargs[LoggerNode.KW_IGNORE_PARAMS].lower()
             self._ignoreParams = (ignoreParams == "true")
         except KeyError:
             pass
@@ -119,6 +117,12 @@ class LoggerNode(Node):
         """
         return self._coreNode.delLastSuccessor()
 
+    def getNumSuccessors(self) -> int:
+        """
+        Override abstract method by delegating to core node.
+        """
+        return self._coreNode.getNumSuccessors()
+
     def getSuccessorAt(self, index: int) -> Node:
         """
         Override abstract method by delegating to core node.
@@ -132,7 +136,7 @@ class LoggerNode(Node):
         return self._coreNode.getSuccessorAtRandom()
 
     @abstractmethod
-    def genInfo(self, timeStamp: str, params: ListOfStr) -> str:
+    def logInfo(self, timeStamp: str, params: List[str]) -> str:
         """
         Create a log message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to
@@ -150,7 +154,7 @@ class LoggerNode(Node):
         pass
 
     @abstractmethod
-    def genError(self, timeStamp: str, params: ListOfStr) -> str:
+    def logError(self, timeStamp: str, params: List[str]) -> str:
         """
         Create an error message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to be
@@ -170,25 +174,39 @@ class LoggerNode(Node):
 
 class SimpleLoggerNode(LoggerNode):
 
-    _minMesgLen = 1
-    _maxMesgLen = 4
-    _mesgPrefixes = ["SimpleLoggerNode: ",
-                     "absynthe.cfg.SimpleLoggerNode: ",
-                     "Simple Log Mesg Generator: "]
+    MIN_MESG_SIZE = 1
+    MAX_MESG_SIZE = 4
+
+    KW_PREFIX = "PREFIX"
 
     def __init__(self, id: str, **kwargs: str) -> None:
         super().__init__(id, **kwargs)
-        self._fixedInfoMesg = self._createLoglineSignature(id)
-        self._fixedErrMesg = self._createLoglineSignature(id, "ERROR")
+        meta: str = None
+        try:
+            meta = kwargs[SimpleLoggerNode.KW_PREFIX]
+        except KeyError:
+            pass
+        except TypeError as te:
+            print(type(self).__name__,
+                  "ERROR: Expect keyword KW_PREFIX to provide `str` type.",
+                  file=stderr)
+            raise te
+        prefix = meta if meta else ""
+        self._fixedInfoMesg = self._createLoglineSignature(id, prefix)
+        prefix += " ERROR"
+        self._fixedErrMesg = self._createLoglineSignature(id, prefix)
         return
 
-    def _createLoglineSignature(self, id: str, mesgAnnotation: str = "") -> str:
-        self._mesgLen = randint(self._minMesgLen, self._maxMesgLen)
-        prefixIdx = randint(0, len(self._mesgPrefixes) - 1)
-        fixedMesgList = [self._mesgPrefixes[prefixIdx], mesgAnnotation]
+    def _createLoglineSignature(self, id: str, mesgPrefix: str = "") -> str:
+        """
+        Create and store a fixed signature that would be emitted with every log
+        message. This node has different fixed signatures for info and error.
+        """
+        self._mesgLen = randint(self.MIN_MESG_SIZE, self.MAX_MESG_SIZE)
+        fixedMesgList = [mesgPrefix]
 
         mesgInfixes = [self._id, self._coreNode.getID()]
-        mesgInfix = mesgAnnotation + "-" if not mesgAnnotation == "" else None
+        mesgInfix = mesgPrefix + "-" if not mesgPrefix == "" else None
         for i in range(self._mesgLen):
             fixedMesgList.append(" ")
             if mesgInfix:
@@ -200,14 +218,20 @@ class SimpleLoggerNode(LoggerNode):
 
         return "".join(fixedMesgList)
 
-    def genInfo(self, timeStamp: str, params: LoggerNode.ListOfStr) -> str:
+    def logInfo(self, timeStamp: str, params: List[str]) -> str:
+        """
+        Override abstract method of super class
+        """
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_INFO)
 
-    def genError(self, timeStamp: str, params: LoggerNode.ListOfStr) -> str:
+    def logError(self, timeStamp: str, params: List[str]) -> str:
+        """
+        Override abstract method of super class
+        """
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_ERR)
 
     def _createMesg(self, timeStamp: str,
-                    params: LoggerNode.ListOfStr,
+                    params: List[str],
                     mesgType: str = LoggerNode.MESG_TYPE_INFO) -> str:
         mesgList = list()
         if mesgType == LoggerNode.MESG_TYPE_INFO:

@@ -1,5 +1,6 @@
 from __future__ import print_function
 from sys import stderr
+from typing import TextIO, List, Tuple
 
 from .node import Node
 from random import randint
@@ -73,7 +74,7 @@ class Graph(object):
           Node: One of the root nodes of this graph, selecte uniformly
                 at random.
         """
-        randomIndex = randint(0, len(self._numRoots) - 1)
+        randomIndex = randint(0, len(self._roots) - 1)
         return self._roots[randomIndex]
 
     def _bfsAndCount(self, node: Node) -> int:
@@ -114,3 +115,51 @@ class Graph(object):
             if r is not None:
                 size += self._bfsAndCount(r)
         return size
+
+    def _bfsAndAdd(self, node: Node, transitionList: List[Tuple[str, str]]) -> None:
+        nodeID = node.getID()
+        try:
+            _ = self._nodeDict[nodeID]
+            return
+        except KeyError:
+            self._nodeDict[nodeID] = True
+            pass
+
+        for i in range(node.getNumSuccessors()):
+            succNode: Node = node.getSuccessorAt(i)
+            succNodeID = succNode.getID()
+            transitionList.append((nodeID, succNodeID))
+            self._bfsAndAdd(succNode, transitionList)
+
+        return
+
+    def dumpDotFile(self, fp: TextIO) -> None:
+        """
+        Creates a file that could be visualised using graphviz's DOT program.
+        Args:
+          fp(typing.TextIO): A text file stream that can be written to.
+        """
+        self._nodeDict = dict()
+        transitionList: List[Tuple[str, str]] = list()
+
+        for r in self._roots:
+            if r is not None:
+                self._bfsAndAdd(r, transitionList)
+
+        fileContent: List[str] = ["digraph \""]
+        fileContent.append(self._id)
+        fileContent.append("\" {\n")
+
+        for transition in transitionList:
+            fileContent.append("\t\"")
+            fileContent.append(transition[0])
+            fileContent.append("\" -> \"")
+            fileContent.append(transition[1])
+            fileContent.append("\";\n")
+
+        fileContent.append("}")
+
+        fileText = "".join(fileContent)
+        fp.write(fileText)
+        fp.flush()
+        return

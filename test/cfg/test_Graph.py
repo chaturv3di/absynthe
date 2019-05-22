@@ -1,4 +1,5 @@
 import unittest
+import os
 
 from absynthe.cfg.graph import Graph
 from absynthe.cfg.node import UniformNode
@@ -21,7 +22,7 @@ class GraphTest(unittest.TestCase):
         self.assertEqual(graph.size(), 0)
         return
 
-    def test_graphSizeNonZero(self):
+    def _buildDummyGraph(self) -> Graph:
         root1 = UniformNode("Root1")
         nodeR1S1 = UniformNode("Root1_Succ1")
         nodeR1S2 = UniformNode("Root1_Succ2")
@@ -40,14 +41,25 @@ class GraphTest(unittest.TestCase):
         root2.addSuccessor(nodeR2S1)
         root2.addSuccessor(nodeR2S2)
 
-        # Create a cycle with edge nodeR2S1 -> root1
-        nodeR2S1.addSuccessor(root1)
+        # Create a cycle with edge nodeR1S1 -> root1
+        nodeR1S1.addSuccessor(root1)
 
         graph = Graph("TestGraph", 2)
         graph.addRoot(root1)
         graph.addRoot(root2)
 
-        self.assertEqual(graph.size(), 8)
+        return graph
+
+    def test_graphSizeNonZero(self):
+        testGraph = self._buildDummyGraph()
+        self.assertEqual(testGraph.size(), 8)
+        return
+
+    def test_graphDump(self):
+        filePath = os.path.dirname("../resources")+"/Graph_test_graphDump.gv"
+        testGraph = self._buildDummyGraph()
+        with open(filePath, "w") as ofp:
+            testGraph.dumpDotFile(ofp)
         return
 
 

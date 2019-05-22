@@ -52,6 +52,15 @@ class UniformNodeTest(unittest.TestCase):
         self.assertEqual(expectedSucc3.getID(), actualSucc3.getID())
         self.assertEqual(originalNumSuccessors, newNumSuccessors + 1)
 
+    def test_04_noSuccessors_pt1(self):
+        testNode = UniformNode("testNode")
+        self.assertEqual(testNode.getSuccessorAtRandom(), None)
+
+    def test_04_noSuccessors_pt2(self):
+        testNode = UniformNode("testNode")
+        with self.assertRaises(IndexError):
+            testNode.getSuccessorAt(0)
+
 
 if __name__ == '__main__':
     unittest.main()
