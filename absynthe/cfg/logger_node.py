@@ -7,6 +7,7 @@ from abc import abstractmethod
 from sys import stderr
 from typing import List
 from random import randint
+from importlib import import_module
 
 
 class LoggerNode(Node):
@@ -26,10 +27,10 @@ class LoggerNode(Node):
     # of this class.
 
     # To specify the class of the core node
-    key_coreClassName = "coreClassName"
+    KW_CORE_CLASS_NAME = "CORE_CLASS_NAME"
 
     # Some nodes ignore flow params while spitting out the log message.
-    key_ignoreFlowParams = "ignoreFlowParams"
+    KW_IGNORE_PARAMS = "IGNORE_PARAMS"
 
     # Type of messages supported
     MESG_TYPE_INFO = "INFO"
@@ -61,16 +62,16 @@ class LoggerNode(Node):
         """
         super().__init__(id, **kwargs)
         coreID = id + "_Core"
-        nodeModule = __import__("absynthe.cfg.node")
+        nodeModule = import_module("absynthe.cfg.node")
 
         # 1. Try to initialise the core node of this object
         self._coreNode: Node = None
         try:
-            className = kwargs[LoggerNode.key_coreClassName]
+            className = kwargs[LoggerNode.KW_CORE_CLASS_NAME]
             self._coreNode = getattr(nodeModule, className)(coreID, **kwargs)
         except KeyError as ke:
             # A core class name is mandatory...
-            print(type(self).__name__, "ERROR: Keyword LoggerNode.key_coreClassName not provided.",
+            print(type(self).__name__, "ERROR: Keyword LoggerNode.KW_CORE_CLASS_NAME not provided",
                   className, file=stderr)
             raise ke
         except AttributeError as ae:
@@ -87,7 +88,7 @@ class LoggerNode(Node):
         # 2. Set other params used by methods that print out log messages
         self._ignoreParams = False
         try:
-            ignoreParams = kwargs[LoggerNode.key_ignoreFlowParams].lower()
+            ignoreParams = kwargs[LoggerNode.KW_IGNORE_PARAMS].lower()
             self._ignoreParams = (ignoreParams == "true")
         except KeyError:
             pass
@@ -115,6 +116,12 @@ class LoggerNode(Node):
         Override abstract method by delegating to core node.
         """
         return self._coreNode.delLastSuccessor()
+
+    def getNumSuccessors(self) -> int:
+        """
+        Override abstract method by delegating to core node.
+        """
+        return self._coreNode.getNumSuccessors()
 
     def getSuccessorAt(self, index: int) -> Node:
         """
@@ -167,25 +174,39 @@ class LoggerNode(Node):
 
 class SimpleLoggerNode(LoggerNode):
 
-    _minMesgLen = 1
-    _maxMesgLen = 4
+    MIN_MESG_SIZE = 1
+    MAX_MESG_SIZE = 4
+
+    KW_PREFIX = "PREFIX"
 
     def __init__(self, id: str, **kwargs: str) -> None:
         super().__init__(id, **kwargs)
-        self._fixedInfoMesg = self._createLoglineSignature(id)
-        self._fixedErrMesg = self._createLoglineSignature(id, "ERROR")
+        meta: str = None
+        try:
+            meta = kwargs[SimpleLoggerNode.KW_PREFIX]
+        except KeyError:
+            pass
+        except TypeError as te:
+            print(type(self).__name__,
+                  "ERROR: Expect keyword KW_PREFIX to provide `str` type.",
+                  file=stderr)
+            raise te
+        prefix = meta if meta else ""
+        self._fixedInfoMesg = self._createLoglineSignature(id, prefix)
+        prefix += " ERROR"
+        self._fixedErrMesg = self._createLoglineSignature(id, prefix)
         return
 
-    def _createLoglineSignature(self, id: str, mesgAnnotation: str = "") -> str:
+    def _createLoglineSignature(self, id: str, mesgPrefix: str = "") -> str:
         """
         Create and store a fixed signature that would be emitted with every log
         message. This node has different fixed signatures for info and error.
         """
-        self._mesgLen = randint(self._minMesgLen, self._maxMesgLen)
-        fixedMesgList = [mesgAnnotation]
+        self._mesgLen = randint(self.MIN_MESG_SIZE, self.MAX_MESG_SIZE)
+        fixedMesgList = [mesgPrefix]
 
         mesgInfixes = [self._id, self._coreNode.getID()]
-        mesgInfix = mesgAnnotation + "-" if not mesgAnnotation == "" else None
+        mesgInfix = mesgPrefix + "-" if not mesgPrefix == "" else None
         for i in range(self._mesgLen):
             fixedMesgList.append(" ")
             if mesgInfix:

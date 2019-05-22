@@ -6,7 +6,7 @@ from absynthe.cfg.logger_node import LoggerNode, SimpleLoggerNode
 class LoggerNodeTest(unittest.TestCase):
 
     def test_abstractClassError(self):
-        kwargs = {LoggerNode.key_coreClassName: "UniformNode"}
+        kwargs = {LoggerNode.KW_CORE_CLASS_NAME: "UniformNode"}
         with self.assertRaises(TypeError):
             _ = LoggerNode("testLogger", **kwargs)
         return
@@ -15,13 +15,14 @@ class LoggerNodeTest(unittest.TestCase):
 class SimpleLoggerNodeTest(unittest.TestCase):
 
     def test_basicTest(self):
-        kwargs = {LoggerNode.key_coreClassName: "UniformNode"}
+        kwargs = {LoggerNode.KW_CORE_CLASS_NAME: "UniformNode",
+                  SimpleLoggerNode.KW_PREFIX: "method1()"}
         _ = SimpleLoggerNode("testLogger", **kwargs)
         # _.printDebugInfo()
         return
 
     def test_logGeneration(self):
-        kwargs = {LoggerNode.key_coreClassName: "UniformNode"}
+        kwargs = {LoggerNode.KW_CORE_CLASS_NAME: "UniformNode"}
         testLogger = SimpleLoggerNode("testLogger", **kwargs)
         params: list = ["test_param ", "123 ", "more test ", "456.789"]
 

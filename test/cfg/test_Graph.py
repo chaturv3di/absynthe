@@ -59,7 +59,7 @@ class GraphTest(unittest.TestCase):
         filePath = os.path.dirname("../resources")+"/Graph_test_graphDump.gv"
         testGraph = self._buildDummyGraph()
         with open(filePath, "w") as ofp:
-            testGraph.dumpDotFie(ofp)
+            testGraph.dumpDotFile(ofp)
         return
 
 

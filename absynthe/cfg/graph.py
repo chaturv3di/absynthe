@@ -74,7 +74,7 @@ class Graph(object):
           Node: One of the root nodes of this graph, selecte uniformly
                 at random.
         """
-        randomIndex = randint(0, len(self._numRoots) - 1)
+        randomIndex = randint(0, len(self._roots) - 1)
         return self._roots[randomIndex]
 
     def _bfsAndCount(self, node: Node) -> int:
@@ -133,7 +133,7 @@ class Graph(object):
 
         return
 
-    def dumpDotFie(self, fp: TextIO) -> None:
+    def dumpDotFile(self, fp: TextIO) -> None:
         """
         Creates a file that could be visualised using graphviz's DOT program.
         Args:
@@ -146,16 +146,16 @@ class Graph(object):
             if r is not None:
                 self._bfsAndAdd(r, transitionList)
 
-        fileContent: List[str] = ["digraph "]
+        fileContent: List[str] = ["digraph \""]
         fileContent.append(self._id)
-        fileContent.append(" {\n")
+        fileContent.append("\" {\n")
 
         for transition in transitionList:
-            fileContent.append("\t")
+            fileContent.append("\t\"")
             fileContent.append(transition[0])
-            fileContent.append(" -> ")
+            fileContent.append("\" -> \"")
             fileContent.append(transition[1])
-            fileContent.append(";\n")
+            fileContent.append("\";\n")
 
         fileContent.append("}")
 

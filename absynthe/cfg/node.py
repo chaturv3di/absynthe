@@ -145,9 +145,11 @@ class UniformNode(Node):
         """
         if successor is None:
             try:
+                # Check if None is already a successor
                 _ = self._successors.index(None)
                 return
             except ValueError:
+                # If not, then add it.
                 pass
         self._successors.append(successor)
         return
