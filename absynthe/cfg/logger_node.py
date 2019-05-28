@@ -243,7 +243,7 @@ class SimpleLoggerNode(LoggerNode):
                              " ERROR: Unsupported type of log message -- ",
                              mesgType)
 
-        if not self._ignoreParams:
+        if params is not None and not self._ignoreParams:
             mesgList.append(" [WITH_PARAMS] ")
             mesgList.extend(params)
 
