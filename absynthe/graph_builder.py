@@ -14,7 +14,7 @@ from sys import modules
 import inspect
 
 # Imports for TreeBuilder
-from time import ctime
+from collections import defaultdict
 from importlib import import_module
 from random import sample
 
@@ -123,20 +123,21 @@ class GraphBuilder(ABC):
             if not inspect.isabstract(obj) and not name == "ABC":
                 self._coreNodeClasses.append(name)
 
+        self._loggerNodeModule = import_module(GraphBuilder.LOGGER_NODE_MODULE)
         # Everything okay, so instantiate object
         return
 
-    def _generateID(self, entityType: str, nodeNum: int, timeStamp: str) -> str:
+    def _generateID(self, entityType: str, nodeNum: int) -> str:
         return "::".join([entityType, str(nodeNum)])
 
-    def _newRandomNode(self, id: str) -> Node:
-        loggerNodeModule = import_module(GraphBuilder.LOGGER_NODE_MODULE)
+    def _newRandomNode(self, eType: str) -> Node:
+        id = self._generateID(eType, TreeBuilder.numNodes)
         loggerNodeClassName = self._supportedNodeTypes[randint(0, len(self._supportedNodeTypes) - 1)]
         coreNodeClassName = self._coreNodeClasses[randint(0, len(self._coreNodeClasses) - 1)]
         logger_kwargs = {LoggerNode.KW_CORE_CLASS_NAME: coreNodeClassName,
                          LoggerNode.KW_IGNORE_PARAMS: "False"}
         TreeBuilder.numNodes += 1
-        return getattr(loggerNodeModule, loggerNodeClassName)(id, **logger_kwargs)
+        return getattr(self._loggerNodeModule, loggerNodeClassName)(id, **logger_kwargs)
 
     def _howManySuccessors(self, succLimit: int = None) -> int:
         """
@@ -186,15 +187,13 @@ class TreeBuilder(GraphBuilder):
         self._nodeLayers: List[List[Node]] = list()
 
         # 1. Create Graph ID.
-        timeStamp: str = ctime()
-        graphID: str = self._generateID("graph", TreeBuilder.numGraphs, timeStamp)
+        graphID: str = self._generateID("graph", TreeBuilder.numGraphs)
         graph: Graph = Graph(graphID, self._numRoots)
 
         # 2. Create desired no. of roots.
         rootLayer: List[Node] = list()
         for _ in range(self._numRoots):
-            nodeID: str = self._generateID("root", TreeBuilder.numNodes, timeStamp)
-            rNode = self._newRandomNode(nodeID)
+            rNode = self._newRandomNode("root")
             graph.addRoot(rNode)
             rootLayer.append(rNode)
         self._nodeLayers.append(rootLayer)
@@ -204,11 +203,14 @@ class TreeBuilder(GraphBuilder):
         currLayer: List[Node] = rootLayer
         nextLayer: List[Node] = [None] * self._numRoots * (self._branchingDegree + self._deltaRange)
         while(nextLayer is not None):
-            balNumInnerNodes -= self._makeConnections(currLayer, nextLayer, timeStamp)
+            balNumInnerNodes -= self._makeConnections(currLayer, nextLayer)
             try:
+                # Since some of the nodes in nextLayer were not assigned any predecessors
+                # from the currLayer, we simply remove those None values.
                 while(True):
                     nextLayer.remove(None)
             except ValueError:
+                # nextLayer is free from None nodes
                 self._nodeLayers.append(nextLayer)
                 currLayer = nextLayer
 
@@ -220,31 +222,52 @@ class TreeBuilder(GraphBuilder):
         # 4. Create desired no. of leaves (nodes with `None` successors)
         leafLayer: List[Node] = list()
         for _ in range(self._numRoots):
-            nodeID: str = self._generateID("leaf", TreeBuilder.numNodes, timeStamp)
-            leafLayer.append(self._newRandomNode(nodeID))
-        _ = self._makeConnections(currLayer, leafLayer, timeStamp, True)
+            leafLayer.append(self._newRandomNode("leaf"))
+        _ = self._makeConnections(currLayer, leafLayer, True)
         self._nodeLayers.append(leafLayer)
 
         return graph
 
     def _makeConnections(self, fromLayer: List[Node], toLayer: List[Node],
-                         timeStamp: str, toLeafLayer: bool = False) -> int:
+                         toLeafLayer: bool = False) -> int:
+        """
+        Except when toLeafLayer is True, it is possible that some of the nodes in toLayer
+        have no predecessors from fromLayer assigned to them at the end of this method.
+        Such nodes might have to be explicitly removed after returning from here.
+        """
         numNodes: int = 0
+        leavesCovered: defaultdict = defaultdict(bool)
+        sizeToLayer: int = len(toLayer)
+        maxLeavesPerNode: int = min(2, sizeToLayer)
         for node in fromLayer:
             if toLeafLayer:
-                succPositions = range(len(toLayer))
+                # Select at most maxLeavesPerNode successors
+                succPositions = sample(range(sizeToLayer), randint(1, maxLeavesPerNode))
             else:
-                succPositions = sample(range(len(toLayer)), self._howManySuccessors())
+                # Select successor positions randomly
+                succPositions = sample(range(sizeToLayer), self._howManySuccessors())
 
             for succPos in succPositions:
+                # Make connections between fromLayer and toLayer
                 succNode: Node = toLayer[succPos]
                 if succNode is None:
-                    succNode = self._newRandomNode(self._generateID("node",
-                                                                    TreeBuilder.numNodes,
-                                                                    timeStamp))
+                    succNode = self._newRandomNode("node")
                     toLayer[succPos] = succNode
                     numNodes += 1
                 node.addSuccessor(succNode)
+                leavesCovered[succPos] = True
+            # At the end of the loop, it is possible that some nodes in toLayer have no
+            # predecessor nodes in fromLayer. In this case, the corresponding succPositions
+            # in toLayer would continue to have None elements.
+
+        if toLeafLayer:
+            # If toLayer is the leaf layer, then we want to ensure that all leaf nodes have
+            # at least one predecessor node.
+            sizeFromLayer: int = len(fromLayer)
+            for succPos in set(range(sizeToLayer)).difference(leavesCovered.keys()):
+                randomFromPos = randint(0, sizeFromLayer - 1)
+                fromLayer[randomFromPos].addSuccessor(toLayer[succPos])
+                numNodes += 1
         return numNodes
 
 
