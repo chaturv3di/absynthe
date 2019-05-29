@@ -77,6 +77,9 @@ class Graph(object):
         randomIndex = randint(0, len(self._roots) - 1)
         return self._roots[randomIndex]
 
+    def getID(self) -> str:
+        return self._id
+
     def _bfsAndCount(self, node: Node) -> int:
         """
         Search the tree located below 'node' in a breadth-first manner,
