@@ -19,7 +19,6 @@ class TreeBuilderTest(unittest.TestCase):
         testTree: Graph = testTreeBuilder.generateNewGraph()
         fileName = os.path.dirname(os.getcwd() + "/test/resources/") + "/TreeBuilder_test_TreeDump.gv"
         with open(fileName, 'w') as f:
-            print("Dumping: ", fileName)
             testTree.dumpDotFile(f)
 
 

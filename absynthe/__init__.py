@@ -5,3 +5,5 @@ from .cfg.logger_node import LoggerNode, SimpleLoggerNode
 from .cfg.graph import Graph
 
 from .graph_builder import GraphBuilder, TreeBuilder
+from .behaviors import SimpleBehavior
+from .graph_builder import TreeBuilder
