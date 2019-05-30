@@ -1,12 +1,16 @@
-from __future__ import print_function
+import imp
+import os
 from setuptools import setup, find_packages
+
+version = imp.load_source(
+    'absynthe.version', os.path.join('absynthe', 'version.py')).VERSION
 
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
 setup(
     name="absynthe",
-    version="0.0.1",
+    version=version,
     url="https://github.com/chaturv3di/absynthe/",
     license="Apache License 2.0",
     author="Namit Chaturvedi",
