@@ -17,7 +17,8 @@ class test_simpleBehavior(unittest.TestCase):
 
         simpleTreeBuilder = TreeBuilder(**tree_kwargs)
 
-        testBehavior = SimpleBehavior()
+        wSessionID: bool = True
+        testBehavior = SimpleBehavior(wSessionID)
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())

@@ -9,9 +9,10 @@ from absynthe.cfg.logger_node import LoggerNode
 
 class SimpleBehavior(object):
 
-    def __init__(self):
+    def __init__(self, withSessions: bool = False):
         self._cfgList: List[Graph] = list()
         self._fixedTimeDelta: float = 0.05
+        self._inclSessionID: bool = withSessions
         return
 
     def addGraph(self, graph: Graph) -> None:
@@ -23,7 +24,7 @@ class SimpleBehavior(object):
         nextNodeOf: List[LoggerNode] = None
         graphIdx: int = -1
         wallClock: float = -2.5
-        for _ in range(numRuns):  # Complete a traversal of each graph
+        for i in range(numRuns):  # Complete a traversal of each graph
             nextNodeOf = [self._cfgList[i].getRootAtRandom() for i in range(numGraphs)]
             graphsAvailable = list(range(numGraphs))  # Shrinks as we reach the leaf of a graph
             toTraverse: int = numGraphs
@@ -37,10 +38,13 @@ class SimpleBehavior(object):
                 graph: Graph = self._cfgList[graphIdx]
 
                 timeStamp: str = str(datetime.fromtimestamp(wallClock))
+                sessionID: str = ""
+                if self._inclSessionID:
+                    sessionID = "_".join(["SESSION", str(i), str(graphIdx)])
 
                 # For the sake of better readability of logs, append
                 # graph ID to the time stamp.
-                logPrefix: str = "".join([timeStamp, " ", graph.getID()])
+                logPrefix: str = " ".join([timeStamp, sessionID, graph.getID()])
                 node: LoggerNode = nextNodeOf[graphIdx]
                 yield node.logInfo(logPrefix, None)
 
