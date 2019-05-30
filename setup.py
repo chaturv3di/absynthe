@@ -19,11 +19,11 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3.6",
+        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: Apache Software License 2.0",
+        "Programming Language :: Python :: 3.6",
+        "Topic :: Internet :: Log Analysis",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
-    install_requires=[
-        'python>=3.6'
-        ],
+    python_requires='>3.6.0',
     )
