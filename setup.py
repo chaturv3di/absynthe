@@ -19,4 +19,7 @@ setup(
         "License :: OSI Approved :: Apache Software License 2.0",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
+    install_requires=[
+        'python>=3.6'
+        ],
     )
