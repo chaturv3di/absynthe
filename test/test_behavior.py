@@ -2,7 +2,7 @@ import unittest
 import os
 
 from absynthe.graph_builder import TreeBuilder
-from absynthe.behaviors import SimpleBehavior
+from absynthe.behavior import SimpleBehavior
 
 
 class test_simpleBehavior(unittest.TestCase):
