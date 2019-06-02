@@ -11,8 +11,7 @@ class TreeBuilderTest(unittest.TestCase):
         tree_kwargs = {TreeBuilder.KW_NUM_ROOTS: "2",
                        TreeBuilder.KW_NUM_LEAVES: "4",
                        TreeBuilder.KW_BRANCHING_DEGREE: "2",
-                       TreeBuilder.KW_MIN_NUM_INNER_NODES: "8",
-                       TreeBuilder.KW_MAX_NUM_INNER_NODES: "16",
+                       TreeBuilder.KW_NUM_INNER_NODES: "16",
                        TreeBuilder.KW_SUPPORTED_NODE_TYPES: "SimpleLoggerNode"}
 
         testTreeBuilder = TreeBuilder(**tree_kwargs)

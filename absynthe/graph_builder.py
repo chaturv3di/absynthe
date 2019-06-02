@@ -33,8 +33,7 @@ class GraphBuilder(ABC):
     # Keywords for the kwargs expected by the constructor
     KW_NUM_ROOTS = "NUM_ROOTS"
     KW_NUM_LEAVES = "NUM_LEAVES"
-    KW_MIN_NUM_INNER_NODES = "MIN_NUM_INNER_NODES"
-    KW_MAX_NUM_INNER_NODES = "MAX_NUM_INNER_NODES"
+    KW_NUM_INNER_NODES = "NUM_INNER_NODES"
     KW_BRANCHING_DEGREE = "BRANCHING_DEGREE"
     KW_SUPPORTED_NODE_TYPES = "SUPPORTED_NODE_TYPES"
 
@@ -45,8 +44,7 @@ class GraphBuilder(ABC):
           **kwargs(str): Must have the following keywords.
             KW_NUM_ROOTS - specifying the number of roots in any graph this builder creates.
             KW_NUM_LEAVES - specifying the number of leaves that any graph can have.
-            KW_MIN_NUM_INNER_NODES - Besides roots and leaves, the min number of inner nodes.
-            KW_MAX_NUM_INNER_NODES - Besides roots and leaves, the max number of inner nodes.
+            KW_NUM_INNER_NODES - Besides roots and leaves, the approx. number of inner nodes.
             KW_BRANCHING_DEGREE - Approximate branching factor for each node.
             KW_SUPPORTED_NODE_TYPES - Concrete LoggerNode types that can be part of graphs.
         """
@@ -54,8 +52,7 @@ class GraphBuilder(ABC):
         # Failure to initialise any one of these will raise an error.
         self._numRoots: int = 0
         self._numLeaves: int = 0
-        self._minNumInnerNodes: int = 0
-        self._maxNumInnerNodes: int = 0
+        self._numInnerNodes: int = 0
         self._branchingDegree: int = 0
         self._deltaRange: int = 0
         self._supportedNodeTypes: List[str] = None
@@ -80,20 +77,11 @@ class GraphBuilder(ABC):
             raise ke
 
         try:
-            self._minNumInnerNodes = int(kwargs[GraphBuilder.KW_MIN_NUM_INNER_NODES])
+            self._numInnerNodes = int(kwargs[GraphBuilder.KW_NUM_INNER_NODES])
         except KeyError as ke:
             print(type(self).__name__,
-                  " ERROR - Minimum number of inner nodes must be specified using the key ",
-                  "GraphBuilder.KW_MIN_NUM_INNER_NODES.",
-                  file=stderr)
-            raise ke
-
-        try:
-            self._maxNumInnerNodes = int(kwargs[GraphBuilder.KW_MAX_NUM_INNER_NODES])
-        except KeyError as ke:
-            print(type(self).__name__,
-                  " ERROR - Maximum number of inner nodes must be specified using the key ",
-                  "GraphBuilder.KW_MAX_NUM_INNER_NODES.",
+                  " ERROR - Number of inner nodes must be specified using the key ",
+                  "GraphBuilder.KW_NUM_INNER_NODES.",
                   file=stderr)
             raise ke
 
@@ -198,7 +186,7 @@ class TreeBuilder(GraphBuilder):
             rootLayer.append(rNode)
         self._nodeLayers.append(rootLayer)
 
-        balNumInnerNodes: int = randint(self._minNumInnerNodes, self._maxNumInnerNodes)
+        balNumInnerNodes: int = self._numInnerNodes
         # 3. For each currLayer, starting with roots
         currLayer: List[Node] = rootLayer
         nextLayer: List[Node] = [None] * self._numRoots * (self._branchingDegree + self._deltaRange)
