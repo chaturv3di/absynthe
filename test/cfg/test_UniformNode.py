@@ -1,6 +1,6 @@
 import unittest
 
-from absynthe.cfg.node import UniformNode
+from absynthe.cfg import UniformNode
 from collections import defaultdict
 
 

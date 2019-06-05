@@ -1,6 +1,6 @@
 import unittest
 
-from absynthe.cfg.node import Node
+from absynthe.cfg import Node
 
 
 class NodeTest(unittest.TestCase):

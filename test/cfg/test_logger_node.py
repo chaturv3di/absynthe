@@ -1,6 +1,6 @@
 import unittest
 
-from absynthe.cfg.logger_node import LoggerNode, SimpleLoggerNode
+from absynthe.cfg import LoggerNode, SimpleLoggerNode
 
 
 class LoggerNodeTest(unittest.TestCase):
