@@ -1,7 +1,7 @@
 import unittest
 
-from absynthe.graph_builder import TreeBuilder
-from absynthe.cfg.graph import Graph
+from absynthe import TreeBuilder
+from absynthe.cfg import Graph
 import os
 
 
@@ -16,7 +16,8 @@ class TreeBuilderTest(unittest.TestCase):
 
         testTreeBuilder = TreeBuilder(**tree_kwargs)
         testTree: Graph = testTreeBuilder.generateNewGraph()
-        fileName = os.path.dirname(os.getcwd() + "/test/resources/") + "/TreeBuilder_test_TreeDump.gv"
+        fileName = os.path.dirname(os.getcwd()
+                                   + "/test/resources/") + "/TreeBuilder_test_TreeDump.gv"
         with open(fileName, 'w') as f:
             testTree.dumpDotFile(f)
 

@@ -160,7 +160,7 @@ class Graph(object):
             fileContent.append(transition[1])
             fileContent.append("\";\n")
 
-        fileContent.append("}")
+        fileContent.append("}\n")
 
         fileText = "".join(fileContent)
         fp.write(fileText)

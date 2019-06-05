@@ -1,8 +1,7 @@
 import unittest
 import os
 
-from absynthe.cfg.graph import Graph
-from absynthe.cfg.node import UniformNode
+from absynthe.cfg import Graph, UniformNode
 
 
 class GraphTest(unittest.TestCase):

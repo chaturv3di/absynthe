@@ -6,8 +6,22 @@ from datetime import datetime
 from absynthe.cfg.graph import Graph
 from absynthe.cfg.logger_node import LoggerNode
 
+# Imports for Behavior
+from abc import ABC, abstractmethod
 
-class SimpleBehavior(object):
+
+class Behavior(ABC):
+
+    @abstractmethod
+    def addGraph(self, graph: Graph) -> None:
+        pass
+
+    @abstractmethod
+    def synthesize(self, numRuns: int) -> None:
+        pass
+
+
+class MonospaceInterleaving(Behavior):
 
     def __init__(self, withSessions: bool = False):
         self._cfgList: List[Graph] = list()

@@ -1,11 +1,10 @@
 import unittest
 import os
 
-from absynthe.graph_builder import TreeBuilder
-from absynthe.behavior import SimpleBehavior
+from absynthe import TreeBuilder, MonospaceInterleaving
 
 
-class test_simpleBehavior(unittest.TestCase):
+class test_monospaceInterleaving(unittest.TestCase):
 
     def test_basicLogGeneration(self):
         tree_kwargs = {TreeBuilder.KW_NUM_ROOTS: "2",
@@ -17,13 +16,14 @@ class test_simpleBehavior(unittest.TestCase):
         simpleTreeBuilder = TreeBuilder(**tree_kwargs)
 
         wSessionID: bool = True
-        testBehavior = SimpleBehavior(wSessionID)
+        testBehavior = MonospaceInterleaving(wSessionID)
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
 
-        fileName = os.path.dirname(os.getcwd() + "/test/resources/") + "/SimpleBehavior_test.log"
+        fileName = os.path.dirname(os.getcwd() +
+                                   "/test/resources/") + "/MonospaceInterleaving_test.log"
         with open(fileName, 'w') as logfile:
             for logLine in testBehavior.synthesize(2):
                 logfile.write(logLine)
