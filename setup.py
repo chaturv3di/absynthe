@@ -20,7 +20,8 @@ setup(
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "License :: OSI Approved :: Apache Software License 2.0",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.6",
         "Topic :: Internet :: Log Analysis",
         "Topic :: Software Development :: Libraries :: Python Modules",
