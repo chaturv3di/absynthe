@@ -1,4 +1,4 @@
-[![Build Status](https://www.travis-ci.org/chaturv3di/absynthe.svg?branch=develop)](https://www.travis-ci.org/chaturv3di/absynthe)
+[![Build Status](https://www.travis-ci.org/chaturv3di/absynthe.svg?branch=master)](https://www.travis-ci.org/chaturv3di/absynthe)
 
 # Absynthe: A (branching) Behavior Synthesizer
 
