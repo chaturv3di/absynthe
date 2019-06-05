@@ -25,5 +25,5 @@ setup(
         "Topic :: Internet :: Log Analysis",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
-    python_requires='>3.6.0',
+    python_requires=">=3.6.0",
     )
