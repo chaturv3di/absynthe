@@ -4,16 +4,21 @@
 
 ## Motivation
 
-You need Absynthe if you wish to simulate the behavior of any well defined 
-process -- whether it's a computer application or a business process flow. This
-package helps in generating such behaviors in the form of logs, primarily to
-aid testing and development of analytic techniques for log analysis and anomaly
-detection. 
+Absynthe came about in response to the need for test data for analysizing the
+performance and accuracy of log analysis algorithms. Even though plenty of real
+life logs are available, e.g. `/var/log/` in unix-based laptops, they do not
+serve the purpose of test data. For that, we need to understand the core
+application logic that is generating these logs.
 
-Multiple business processes or computer applications could be dumping their
-logs into a single log stream in an interleaving manner. This means that
-consecutive log lines could have originated in different, unrelated application
-components. Absynthe is able to simulate such situations.
+A more interesting situation arises while trying to test log analytic (and
+anomaly detection) solutions for distributed applications where multiple
+sources or modules emit their respective log messages in a single log queue or
+stream. This means that consecutive log lines could have originated from
+different, unrelated application components. Absynthe provides _ground truth_
+models to simulate such situations.
+
+You need Absynthe if you wish to simulate the behavior of any well defined 
+process -- whether it's a computer application or a business process flow.
 
 ## Overview
 
@@ -41,8 +46,71 @@ which the log message corresponds. A single CFG might participate in multiple
 sessions, where each session is a different traversal of the CFG. Therefore, we
 maintain both session ID and CFG ID in the log line.
 
+## Installation
+
+The latest release is available on PyPi, simply `pip install absynthe`. The
+`master` branch of this repository will always provide the latest release.
+
+For the latest features, checkout the `develop` branch and `pip install .`.
+
 ## Usage
 
-The easiest way to use Absynthe is to `pip install absynthe` and then refer to
-the method `basicLogGeneration` in the first example file in `examples` folder
-in this repository.
+It is possible to start using Absynthe with two classes:
+
+1. any concrete implementation of the abstract `GraphBuilder` class, which
+generates CFGs, and
+2. any concrete implementation of the abstract `Behavior` class, which
+traverses the CFGs generated above and emits log messages.
+
+For instance, consider the `basicLogGeneration` method in
+`./examples/01_generateSimpleBehavior.py`:
+
+```python3
+from absynthe import TreeBuilder, MonospaceInterleaving
+
+
+def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
+                       branching: int = 2, numInnerNodes: int = 16,
+                       loggerNodeTypes: str = "SimpleLoggerNode"):
+    # Capture all the arguments required by GraphBuilder class
+    tree_kwargs = {TreeBuilder.KW_NUM_ROOTS: str(numRoots),
+                   TreeBuilder.KW_NUM_LEAVES: str(numLeaves),
+                   TreeBuilder.KW_BRANCHING_DEGREE: str(branching),
+                   TreeBuilder.KW_NUM_INNER_NODES: str(numInnerNodes),
+                   TreeBuilder.KW_SUPPORTED_NODE_TYPES: loggerNodeTypes}
+
+    # Instantiate a concrete GraphBuilder. Note that the
+    # generateNewGraph() method of this class returns a
+    # new, randomly generated graph that (more or less)
+    # satisfies all the parameters provided to the
+    # constructor, viz. tree_kwargs in the present case.
+    simpleTreeBuilder = TreeBuilder(**tree_kwargs)
+
+    # Instantiate a concrete behavior generator. Some
+    # behavior generators do not print unique session ID
+    # for each run, but it's nice to have those.
+    wSessionID: bool = True
+    exBehavior = MonospaceInterleaving(wSessionID)
+
+    # Add multiple graphs to this behavior generator. The
+    # behaviors that it will synthesize would essentially
+    # be interleavings of simultaneous traversals of all
+    # these graphs.
+    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
+    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
+    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
+    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
+
+    # Specify how many behaviors are to be synthesized,
+    # and get going.
+    numTraversalsOfEachGraph: int = 2
+    for logLine in exBehavior.synthesize(numTraversalsOfEachGraph):
+        print(logLine)
+    return
+```
+
+## Comping Up...
+
+Sophisticated behaviors, complex graphs with loops, nodes whose successors are
+chosen from non-uniform distributions, logger nodes that emit more _life like_
+messages.
