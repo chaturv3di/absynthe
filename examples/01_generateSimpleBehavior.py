@@ -12,15 +12,30 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
                    TreeBuilder.KW_NUM_INNER_NODES: str(numInnerNodes),
                    TreeBuilder.KW_SUPPORTED_NODE_TYPES: loggerNodeTypes}
 
+    # Instantiate a concrete GraphBuilder. Note that the
+    # generateNewGraph() method of this class returns a
+    # new, randomly generated graph that (more or less)
+    # satisfies all the parameters provided to the
+    # constructor, viz. tree_kwargs in the present case.
     simpleTreeBuilder = TreeBuilder(**tree_kwargs)
 
+    # Instantiate a concrete behavior generator. Some
+    # behavior generators do not print unique session ID
+    # for each run, but it's nice to have those.
     wSessionID: bool = True
     testBehavior = MonospaceInterleaving(wSessionID)
+
+    # Add multiple graphs to this behavior generator. The
+    # behaviors that it will synthesize would essentially
+    # be interleavings of simultaneous traversals of all
+    # these graphs.
     testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
     testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
     testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
     testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
 
+    # Specify how many behaviors are to be synthesized,
+    # and get going.
     numTraversalsOfEachGraph: int = 2
     for logLine in testBehavior.synthesize(numTraversalsOfEachGraph):
         print(logLine)

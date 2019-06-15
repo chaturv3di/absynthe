@@ -25,10 +25,32 @@ class GraphBuilder(ABC):
     keyword arguments to initialise itself. The base class only specifies one method,
     `generateNewGraph()`, which should be able to generate a *new* graph with every invocation
     (subject to the initialising parameters).
+
+    This class can be extended in two ways:
+
+    1. As illustrated by the TreeBuilder class and its subclasses, implementations that take
+       a number of arguments and randomly create new graphs.
+    2. TODO: Implementations that read hand-crafted specifications and creates graphs that
+       meet those specs.
     """
 
-    # Node module
-    LOGGER_NODE_MODULE = "absynthe.cfg.logger_node"
+    def __init__(self, **kwargs: str) -> None:
+        pass
+
+    @abstractmethod
+    def generateNewGraph(self, **kwargs: str) -> Graph:
+        """
+        Generates a new graph adhering to the arguments specified by the kwargs
+        in the constructor. Each invocation of this method can potentially
+        generate a different graph.
+        """
+        pass
+
+
+class TreeBuilder(GraphBuilder):
+
+    numGraphs: int = 0
+    numNodes: int = 0
 
     # Keywords for the kwargs expected by the constructor
     KW_NUM_ROOTS = "NUM_ROOTS"
@@ -36,6 +58,9 @@ class GraphBuilder(ABC):
     KW_NUM_INNER_NODES = "NUM_INNER_NODES"
     KW_BRANCHING_DEGREE = "BRANCHING_DEGREE"
     KW_SUPPORTED_NODE_TYPES = "SUPPORTED_NODE_TYPES"
+
+    # Node module
+    LOGGER_NODE_MODULE = "absynthe.cfg.logger_node"
 
     def __init__(self, **kwargs: str) -> None:
         """
@@ -148,27 +173,47 @@ class GraphBuilder(ABC):
         theseMany = self._branchingDegree + delta
         return theseMany
 
-    def size(self) -> int:
-        return self._numNodes
-
-    @abstractmethod
-    def generateNewGraph(self) -> Graph:
+    def _makeConnections(self, fromLayer: List[Node], toLayer: List[Node],
+                         toLeafLayer: bool = False) -> int:
         """
-        Generates a new graph adhering to the arguments specified by the kwargs
-        in the constructor. Each invocation of this method can potentially
-        generate a different graph.
+        Except when toLeafLayer is True, it is possible that some of the nodes in toLayer
+        have no predecessors from fromLayer assigned to them at the end of this method.
+        Such nodes might have to be explicitly removed after returning from here.
         """
-        pass
+        numNodes: int = 0
+        leavesCovered: defaultdict = defaultdict(bool)
+        sizeToLayer: int = len(toLayer)
+        maxLeavesPerNode: int = min(2, sizeToLayer)
+        for node in fromLayer:
+            if toLeafLayer:
+                # Select at most maxLeavesPerNode successors
+                succPositions = sample(range(sizeToLayer), randint(1, maxLeavesPerNode))
+            else:
+                # Select successor positions randomly
+                succPositions = sample(range(sizeToLayer), self._howManySuccessors())
 
+            for succPos in succPositions:
+                # Make connections between fromLayer and toLayer
+                succNode: Node = toLayer[succPos]
+                if succNode is None:
+                    succNode = self._newRandomNode("node")
+                    toLayer[succPos] = succNode
+                    numNodes += 1
+                node.addSuccessor(succNode)
+                leavesCovered[succPos] = True
+            # At the end of the loop, it is possible that some nodes in toLayer have no
+            # predecessor nodes in fromLayer. In this case, the corresponding succPositions
+            # in toLayer would continue to have None elements.
 
-class TreeBuilder(GraphBuilder):
-
-    numGraphs: int = 0
-    numNodes: int = 0
-
-    def __init__(self, **kwargs: str) -> None:
-        super().__init__(**kwargs)
-        return
+        if toLeafLayer:
+            # If toLayer is the leaf layer, then we want to ensure that all leaf nodes have
+            # at least one predecessor node.
+            sizeFromLayer: int = len(fromLayer)
+            for succPos in set(range(sizeToLayer)).difference(leavesCovered.keys()):
+                randomFromPos = randint(0, sizeFromLayer - 1)
+                fromLayer[randomFromPos].addSuccessor(toLayer[succPos])
+                numNodes += 1
+        return numNodes
 
     def generateNewGraph(self) -> Graph:
         TreeBuilder.numGraphs += 1
@@ -216,48 +261,6 @@ class TreeBuilder(GraphBuilder):
 
         return graph
 
-    def _makeConnections(self, fromLayer: List[Node], toLayer: List[Node],
-                         toLeafLayer: bool = False) -> int:
-        """
-        Except when toLeafLayer is True, it is possible that some of the nodes in toLayer
-        have no predecessors from fromLayer assigned to them at the end of this method.
-        Such nodes might have to be explicitly removed after returning from here.
-        """
-        numNodes: int = 0
-        leavesCovered: defaultdict = defaultdict(bool)
-        sizeToLayer: int = len(toLayer)
-        maxLeavesPerNode: int = min(2, sizeToLayer)
-        for node in fromLayer:
-            if toLeafLayer:
-                # Select at most maxLeavesPerNode successors
-                succPositions = sample(range(sizeToLayer), randint(1, maxLeavesPerNode))
-            else:
-                # Select successor positions randomly
-                succPositions = sample(range(sizeToLayer), self._howManySuccessors())
-
-            for succPos in succPositions:
-                # Make connections between fromLayer and toLayer
-                succNode: Node = toLayer[succPos]
-                if succNode is None:
-                    succNode = self._newRandomNode("node")
-                    toLayer[succPos] = succNode
-                    numNodes += 1
-                node.addSuccessor(succNode)
-                leavesCovered[succPos] = True
-            # At the end of the loop, it is possible that some nodes in toLayer have no
-            # predecessor nodes in fromLayer. In this case, the corresponding succPositions
-            # in toLayer would continue to have None elements.
-
-        if toLeafLayer:
-            # If toLayer is the leaf layer, then we want to ensure that all leaf nodes have
-            # at least one predecessor node.
-            sizeFromLayer: int = len(fromLayer)
-            for succPos in set(range(sizeToLayer)).difference(leavesCovered.keys()):
-                randomFromPos = randint(0, sizeFromLayer - 1)
-                fromLayer[randomFromPos].addSuccessor(toLayer[succPos])
-                numNodes += 1
-        return numNodes
-
 
 class DAGBuilder(TreeBuilder):
 
@@ -268,7 +271,7 @@ class DAGBuilder(TreeBuilder):
     def generateNewGraph(self) -> Graph:
         # 1. super().generateNewGraph()
         # 2. Randomly add skip edges, i.e. from layer_i to layer_>(i + 1)
-        return None
+        return super().generateNewGraph()
 
 
 class GraphBuilder(DAGBuilder):
@@ -281,4 +284,4 @@ class GraphBuilder(DAGBuilder):
         # 1. super().generateNewGraph()
         # 2. Randomly add few reverse edges
         # 3. Add loops
-        return None
+        return super().generateNewGraph()
