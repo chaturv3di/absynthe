@@ -111,6 +111,15 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
 
 ## Comping Up...
 
-Sophisticated behaviors, complex graphs with loops, nodes whose successors are
-chosen from non-uniform distributions, logger nodes that emit more _life like_
-messages.
+### ...in v0.0.2
+
+1. In `absynthe.graph_builder`, `DAGBuilder` and  `GraphBuilder` classes, which
+build CFGs with skip-level edges and loops respectively.
+2. In `absynthe.cfg.node`, `GaussianNode` and `BetaNode` classes, which exploit
+the Gaussian and beta distributions, respectively, to select successor nodes at
+the time of traversal.
+
+### ...eventually
+
+Sophisticated interleaving behaviors; logger nodes that emit more _life like_
+log messages.
