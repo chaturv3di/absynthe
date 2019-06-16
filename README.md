@@ -66,7 +66,8 @@ For instance, consider the `basicLogGeneration` method in
 `./examples/01_generateSimpleBehavior.py`:
 
 ```python3
-from absynthe import TreeBuilder, MonospaceInterleaving
+from absynthe.graph_builder import TreeBuilder
+from absynthe.behavior import MonospaceInterleaving
 
 
 def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
