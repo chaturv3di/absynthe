@@ -1,7 +1,7 @@
 import sys
 import argparse
 
-from absynthe import TreeBuilder
+from absynthe.graph_builder import TreeBuilder
 
 
 def treeGeneration(numRoots: int = 2, numLeaves: int = 4,
