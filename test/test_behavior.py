@@ -1,7 +1,8 @@
 import unittest
 import os
 
-from absynthe import TreeBuilder, MonospaceInterleaving
+from absynthe.graph_builder import TreeBuilder
+from absynthe.behavior import MonospaceInterleaving
 
 
 class test_monospaceInterleaving(unittest.TestCase):

@@ -1,6 +1,7 @@
 import argparse
 
-from absynthe import TreeBuilder, MonospaceInterleaving
+from absynthe.graph_builder import TreeBuilder
+from absynthe.behavior import MonospaceInterleaving
 
 
 def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,

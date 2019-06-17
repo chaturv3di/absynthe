@@ -13,10 +13,11 @@ from abc import ABC, abstractmethod
 from sys import modules
 import inspect
 
-# Imports for TreeBuilder
+# Imports for concrete builders
 from collections import defaultdict
 from importlib import import_module
 from random import sample
+from math import ceil
 
 
 class GraphBuilder(ABC):
@@ -83,51 +84,52 @@ class TreeBuilder(GraphBuilder):
         self._supportedNodeTypes: List[str] = None
         self._rootList: List[Node] = None
 
+        className: str = type(self).__name__
         try:
-            self._numRoots = int(kwargs[GraphBuilder.KW_NUM_ROOTS])
+            self._numRoots = int(kwargs[TreeBuilder.KW_NUM_ROOTS])
         except KeyError as ke:
-            print(type(self).__name__,
-                  " ERROR - Number of roots must be specified using the key ",
-                  "GraphBuilder.KW_NUM_ROOTS.",
+            print(className,
+                  "ERROR - Number of roots must be specified using the key",
+                  className, "\b.KW_NUM_ROOTS.",
                   file=stderr)
             raise ke
 
         try:
-            self._numLeaves = int(kwargs[GraphBuilder.KW_NUM_LEAVES])
+            self._numLeaves = int(kwargs[TreeBuilder.KW_NUM_LEAVES])
         except KeyError as ke:
-            print(type(self).__name__,
-                  " ERROR - Number of leaves must be specified using the key ",
-                  "GraphBuilder.KW_NUM_LEAVES.",
+            print(className,
+                  "ERROR - Number of leaves must be specified using the key",
+                  className, "\b.KW_NUM_LEAVES.",
                   file=stderr)
             raise ke
 
         try:
-            self._numInnerNodes = int(kwargs[GraphBuilder.KW_NUM_INNER_NODES])
+            self._numInnerNodes = int(kwargs[TreeBuilder.KW_NUM_INNER_NODES])
         except KeyError as ke:
-            print(type(self).__name__,
-                  " ERROR - Number of inner nodes must be specified using the key ",
-                  "GraphBuilder.KW_NUM_INNER_NODES.",
+            print(className,
+                  "ERROR - Number of inner nodes must be specified using the key",
+                  className, "\b.KW_NUM_INNER_NODES.",
                   file=stderr)
             raise ke
 
         try:
-            self._branchingDegree = int(kwargs[GraphBuilder.KW_BRANCHING_DEGREE])
+            self._branchingDegree = int(kwargs[TreeBuilder.KW_BRANCHING_DEGREE])
             self._deltaRange = self._branchingDegree // 2
         except KeyError as ke:
-            print(type(self).__name__,
-                  " ERROR - Approx. branching degree must be specified using the key ",
-                  "GraphBuilder.KW_BRANCHING_DEGREE.",
+            print(className,
+                  "ERROR - Approx. branching degree must be specified using the key",
+                  className, "\b.KW_BRANCHING_DEGREE.",
                   file=stderr)
             raise ke
 
         try:
             self._supportedNodeTypes = [x.strip()
                                         for x in
-                                        kwargs[GraphBuilder.KW_SUPPORTED_NODE_TYPES].split(',')]
+                                        kwargs[TreeBuilder.KW_SUPPORTED_NODE_TYPES].split(',')]
         except KeyError as ke:
-            print(type(self).__name__,
-                  "ERROR- Types of nodes supported in this graph must be specified using the key ",
-                  "GraphBuilder.KW_SUPPORTED_NODE_TYPES as comma-separated list of class names.",
+            print(className,
+                  "ERROR- Types of nodes supported in this graph must be specified using the key",
+                  className, "\b.KW_SUPPORTED_NODE_TYPES as comma-separated list of class names.",
                   file=stderr)
             raise ke
 
@@ -136,7 +138,7 @@ class TreeBuilder(GraphBuilder):
             if not inspect.isabstract(obj) and not name == "ABC":
                 self._coreNodeClasses.append(name)
 
-        self._loggerNodeModule = import_module(GraphBuilder.LOGGER_NODE_MODULE)
+        self._loggerNodeModule = import_module(TreeBuilder.LOGGER_NODE_MODULE)
         # Everything okay, so instantiate object
         return
 
@@ -254,7 +256,7 @@ class TreeBuilder(GraphBuilder):
 
         # 4. Create desired no. of leaves (nodes with `None` successors)
         leafLayer: List[Node] = list()
-        for _ in range(self._numRoots):
+        for _ in range(self._numLeaves):
             leafLayer.append(self._newRandomNode("leaf"))
         _ = self._makeConnections(currLayer, leafLayer, True)
         self._nodeLayers.append(leafLayer)
@@ -263,25 +265,117 @@ class TreeBuilder(GraphBuilder):
 
 
 class DAGBuilder(TreeBuilder):
+    """
+    Directed Acyclic Graph Builder class
+    """
 
     def __init__(self, **kwargs: str) -> None:
         super().__init__(**kwargs)
+        # A graph with N layers will contain (N // _skipFraction) skip edges
+        self._skipFraction: int = 3
         return
 
     def generateNewGraph(self) -> Graph:
         # 1. super().generateNewGraph()
         # 2. Randomly add skip edges, i.e. from layer_i to layer_>(i + 1)
-        return super().generateNewGraph()
+        graph: Graph = super().generateNewGraph()
+
+        numLevels: int = len(self._nodeLayers)
+        if 4 > numLevels:
+            return graph
+
+        # Randomly choose levels from where some node will have an outgoing skip-edge
+        fromLevels: List[int] = sample(range(numLevels - 2),
+                                       numLevels // self._skipFraction)
+        numNodesInLevel: int = 0
+        for level in fromLevels:
+            # For each level in the random list created above,
+            # select a random node from which a skip-edge will
+            # start
+            numNodesInLevel = len(self._nodeLayers[level])
+            fromNode: Node = self._nodeLayers[level][randint(0, numNodesInLevel - 1)]
+            # Randomly select a lower level at which the skip-
+            # edge will terminate
+            toLevel: int = randint(level + 2, numLevels - 1)
+            numNodesInLevel = len(self._nodeLayers[toLevel])
+            # In the said lower level, randomly select a node
+            # that will receive the skip-edge
+            toNode: Node = self._nodeLayers[toLevel][randint(0, numNodesInLevel - 1)]
+            fromNode.addSuccessor(toNode)
+        return graph
 
 
-class GraphBuilder(DAGBuilder):
+class DCGBuilder(DAGBuilder):
+    """
+    Directed Cyclic Graph Builder class
+    """
+
+    # Additional keyword(s) for the kwargs expected by the constructor
+    KW_REVERSE_EDGES = "REVERSE_EDGES"
 
     def __init__(self, **kwargs: str) -> None:
         super().__init__(**kwargs)
+
+        self._reverseEdges: bool = False
+        try:
+            self._reverseEdges = bool(kwargs[DCGBuilder.KW_REVERSE_EDGES])
+        except KeyError:
+            self._reverseEdges = False
+        # If a graph has N inner nodes, then (N // _loopFraction) nodes will
+        # be set aside to appear in loops.
+        self._loopFraction = 5
+        self._numLoopNodes = ceil(self._numInnerNodes / self._loopFraction)
+        self._numInnerNodes -= self._numLoopNodes
+        return
+
+    def _attachLoop(self, toNode: Node, ofSize: int) -> None:
+        entityType: str = "loop_" + toNode.getID()
+        currNode: Node = toNode
+        loopNode: Node = None
+        for _ in range(ofSize):
+            loopNode = self._newRandomNode(entityType)
+            currNode.addSuccessor(loopNode)
+            currNode = loopNode
+
+        currNode.addSuccessor(toNode)
         return
 
     def generateNewGraph(self) -> Graph:
         # 1. super().generateNewGraph()
-        # 2. Randomly add few reverse edges
-        # 3. Add loops
-        return super().generateNewGraph()
+        graph: Graph = super().generateNewGraph()
+
+        numLevels: int = len(self._nodeLayers)
+        if 3 > numLevels:
+            return graph
+
+        # 2. Add loops
+        numNodesPerLoop: int = 3  # FIXED FOR NOW
+        numLoops: int = ceil(self._numLoopNodes / numNodesPerLoop)
+        for _ in range(numLoops):
+            level: int = randint(1, numLevels - 2)
+            nodeNum: int = randint(0, len(self._nodeLayers[level]) - 1)
+            toNode: Node = self._nodeLayers[level][nodeNum]
+            self._attachLoop(toNode, numNodesPerLoop)
+
+        if not self._reverseEdges:
+            return graph
+
+        # 3. Randomly add few reverse edges
+        fromLevels: List[int] = sample(range(2, numLevels - 1),
+                                       numLevels // self._skipFraction)
+        for level in fromLevels:
+            # For each level in the random list created above,
+            # select a random node from which a reverse edge
+            # will start
+            numNodesInLevel = len(self._nodeLayers[level])
+            fromNode: Node = self._nodeLayers[level][randint(0, numNodesInLevel - 1)]
+            # Randomly select an upper level at which the
+            # reverse edge will terminate
+            toLevel: int = randint(0, level - 2)
+            numNodesInLevel = len(self._nodeLayers[toLevel])
+            # In the said upper level, randomly select a node
+            # that will receive the skip-edge
+            toNode: Node = self._nodeLayers[toLevel][randint(0, numNodesInLevel - 1)]
+            fromNode.addSuccessor(toNode)
+
+        return graph

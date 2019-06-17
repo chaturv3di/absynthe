@@ -66,7 +66,8 @@ For instance, consider the `basicLogGeneration` method in
 `./examples/01_generateSimpleBehavior.py`:
 
 ```python3
-from absynthe import TreeBuilder, MonospaceInterleaving
+from absynthe.graph_builder import TreeBuilder
+from absynthe.behavior import MonospaceInterleaving
 
 
 def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
@@ -113,7 +114,7 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
 
 ### ...in v0.0.2
 
-1. In `absynthe.graph_builder`, `DAGBuilder` and  `GraphBuilder` classes, which
+1. In `absynthe.graph_builder`, `DAGBuilder` and  `DCGBuilder` classes, which
 build CFGs with skip-level edges and loops respectively.
 2. In `absynthe.cfg.node`, `GaussianNode` and `BetaNode` classes, which exploit
 the Gaussian and beta distributions, respectively, to select successor nodes at
