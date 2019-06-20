@@ -135,6 +135,10 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
     return
 ```
 
+In order to generate behaviors from a directed cyclic CFG, create a DCG as shown
+in `./examples/03_generateControlFlowDCG.py ` and then generate behaviors after
+adding the DCG to a behavior object as shown in the code snippet above.
+
 ## Comping Up...
 
 ### ...in v0.0.2
