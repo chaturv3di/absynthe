@@ -3,8 +3,7 @@ from typing import List
 from random import randint
 from datetime import datetime
 
-from absynthe.cfg.graph import Graph
-from absynthe.cfg.logger_node import LoggerNode
+from .cfg import LoggerNode, Graph
 
 # Imports for Behavior
 from abc import ABC, abstractmethod
