@@ -24,8 +24,13 @@ process -- whether it's a computer application or a business process flow.
 
 Each business process or compuater application is modelled as a _control flow
 graph_ (or _CFG_), which typically has one or more roots (i.e. entry) nodes and
-multiple leaf (i.e. end) nodes. An example of a CFG generated using Absynthe is
-shown below.
+multiple leaf (i.e. end) nodes.
+
+### Tree-like CFG
+
+An example of a simple, tree-like CFG generated using Absynthe is shown below.
+This is like a tree since nodes are laid out in levels, and nodes at level `i`
+have outgoing edges only to nodes at level `i + 1`.
 
 <img src="imgs/02_exampleCFG.png" width="1000" align="middle" />
 
@@ -45,6 +50,26 @@ present, the log message is simply a random concatenation of the node ID to
 which the log message corresponds. A single CFG might participate in multiple
 sessions, where each session is a different traversal of the CFG. Therefore, we
 maintain both session ID and CFG ID in the log line.
+
+### Directed Cyclic CFG
+
+An example of a more complex CFG, a directed cyclic graph, is shown in the
+figure below. It expands the tree-like graph illustrated above by:
+
+1. attaching loops on some of the nodes,
+2. constructing skip-level edges, i.e. edges from a node at level `i` to a
+node at level &ge;`(i + 2)`, and
+3. optionally, upward edges (not shown here), i.e. edges from a node at
+level `i` to a node at level &le;`(i - 1)`.
+
+<img src="imgs/03_exampleDCG.png" width="1000" align="middle" />
+
+The identifiers of nodes appearing loops are helpfully prefixed with the
+identifiers of nodes where these loops start and finish. Moreover, loops could
+be traversed multiple times in a single behavior, as illustrated in the figure
+below.
+
+<img src="imgs/03_exampleLoop.png" width="1000" align="middle" />
 
 ## Installation
 
@@ -109,6 +134,10 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
         print(logLine)
     return
 ```
+
+In order to generate behaviors from a directed cyclic CFG, create a DCG as shown
+in `./examples/03_generateControlFlowDCG.py` and then generate behaviors after
+adding the DCG to a behavior object as shown in the code snippet above.
 
 ## Comping Up...
 

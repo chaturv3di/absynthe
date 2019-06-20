@@ -4,16 +4,14 @@ from typing import List
 from random import randint
 
 # Local imports
-from .cfg.node import Node
-from .cfg.logger_node import LoggerNode
-from .cfg.graph import Graph
+from .cfg import Node, LoggerNode, Graph
 
 # Imports for GraphBuilder
 from abc import ABC, abstractmethod
 from sys import modules
 import inspect
 
-# Imports for concrete builders
+# Imports for concrete graph builders
 from collections import defaultdict
 from importlib import import_module
 from random import sample
@@ -218,6 +216,11 @@ class TreeBuilder(GraphBuilder):
         return numNodes
 
     def generateNewGraph(self) -> Graph:
+        """
+        Returns:
+          Graph: A tree-like graph, which mostly satisfies the specifications provided
+                 in the constructor.
+        """
         TreeBuilder.numGraphs += 1
         self._nodeLayers: List[List[Node]] = list()
 
@@ -270,12 +273,35 @@ class DAGBuilder(TreeBuilder):
     """
 
     def __init__(self, **kwargs: str) -> None:
+        """
+        Construtor for the class takes exactly the same keyword arguments as TreeBuilder.
+        Args:
+          **kwargs(str): Must have the following keywords.
+            KW_NUM_ROOTS - specifying the number of roots in any graph this builder creates.
+            KW_NUM_LEAVES - specifying the number of leaves that any graph can have.
+            KW_NUM_INNER_NODES - Besides roots and leaves, the approx. number of inner nodes.
+            KW_BRANCHING_DEGREE - Approximate branching factor for each node.
+            KW_SUPPORTED_NODE_TYPES - Concrete LoggerNode types that can be part of graphs.
+        """
         super().__init__(**kwargs)
         # A graph with N layers will contain (N // _skipFraction) skip edges
         self._skipFraction: int = 3
         return
 
     def generateNewGraph(self) -> Graph:
+        """
+        This method first constructs a tree using the super class' generateNewGraph()
+        method, and then adds some skip-level edges. Skip-level edges are edges that
+        originate at a node on some level `i` and terminate at a node at some level
+        `> (i + 1)`.
+
+        Skip-level edges are only added to the graph if there are enough inner nodes to
+        allow more than three levels.
+
+        Returns:
+          Graph: A directed acyclic graph, which mostly satisfies the specifications
+                 provided in the constructor.
+        """
         # 1. super().generateNewGraph()
         # 2. Randomly add skip edges, i.e. from layer_i to layer_>(i + 1)
         graph: Graph = super().generateNewGraph()
@@ -314,6 +340,22 @@ class DCGBuilder(DAGBuilder):
     KW_REVERSE_EDGES = "REVERSE_EDGES"
 
     def __init__(self, **kwargs: str) -> None:
+        """
+        Construtor for the class takes all the keyword arguments of the super(-super) class
+        TreeBuilder, and an additional one.
+        Args:
+          **kwargs(str): Must have the following keywords.
+            KW_NUM_ROOTS - specifying the number of roots in any graph this builder creates.
+            KW_NUM_LEAVES - specifying the number of leaves that any graph can have.
+            KW_NUM_INNER_NODES - Besides roots and leaves, the approx. number of inner nodes.
+            KW_BRANCHING_DEGREE - Approximate branching factor for each node.
+            KW_SUPPORTED_NODE_TYPES - Concrete LoggerNode types that can be part of graphs.
+
+            KW_REVERSE_EDGES - specifying whether or not there should be edges in the
+                               "upward" direction, i.e. *to* level `i` *from* some level
+                               `>i`. Reverse edges are only constructed if the graph has more
+                               than 3 level.
+        """
         super().__init__(**kwargs)
 
         self._reverseEdges: bool = False
@@ -341,6 +383,17 @@ class DCGBuilder(DAGBuilder):
         return
 
     def generateNewGraph(self) -> Graph:
+        """
+        This method first constructs a DAG using the super class' generateNewGraph()
+        method, and then adds loops and (optionally) reverse edges.
+
+        Loops and reverse edges can only be added to a graph if there are enough
+        inner nodes to allow more than three levels.
+
+        Returns:
+          Graph: A directed cyclic graph, which mostly satisfies the specifications
+                 provided in the constructor.
+        """
         # 1. super().generateNewGraph()
         graph: Graph = super().generateNewGraph()
 

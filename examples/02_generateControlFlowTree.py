@@ -20,9 +20,9 @@ def treeGeneration(numRoots: int = 2, numLeaves: int = 4,
 
 if "__main__" == __name__:
     """
-    Dumps a simple control flow graph on standard output. This output can be redirected to a file
-    and converted to an image using graphviz's 'dot' utility. The graph is generated with fair
-    amount of randomness, so repeated invocations with the same set of parameters will yield
+    Dumps a simple, tree-like control flow graph on standard output. This output can be redirected
+    to a file and converted to an image using graphviz's 'dot' utility. The graph is generated with
+    fair amount of randomness, so repeated invocations with the same set of parameters will yield
     different graphs.
     """
     argParser = argparse.ArgumentParser(description="Dumps a simple control flow graph on standard"

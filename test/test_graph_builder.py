@@ -7,7 +7,7 @@ import os
 
 class TreeBuilderTest(unittest.TestCase):
 
-    def test_basicTest(self):
+    def test_treeTest(self):
         tree_kwargs = {TreeBuilder.KW_NUM_ROOTS: "2",
                        TreeBuilder.KW_NUM_LEAVES: "4",
                        TreeBuilder.KW_BRANCHING_DEGREE: "2",
