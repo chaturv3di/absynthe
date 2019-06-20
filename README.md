@@ -58,9 +58,9 @@ figure below. It expands the tree-like graph illustrated above by:
 
 1. attaching loops on some of the nodes,
 2. constructing skip-level edges, i.e. edges from a node at level `i` to a
-node at level `&ge; (i + 2)`, and
+node at level &ge;`(i + 2)`, and
 3. optionally, upward edges (not shown here), i.e. edges from a node at
-level `i` to a node at level `&le; (i - 1)`.
+level `i` to a node at level &le;`(i - 1)`.
 
 <img src="imgs/03_exampleDCG.png" width="1000" align="middle" />
 
