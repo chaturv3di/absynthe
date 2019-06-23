@@ -7,6 +7,10 @@ from abc import ABC, abstractmethod
 # Imports for UniformNode
 from random import randint
 
+# Import for BinomialNode
+from scipy.stats import binom
+from random import random
+
 
 class Node(ABC):
     """
@@ -67,7 +71,7 @@ class Node(ABC):
     # Abstract methods
 
     @abstractmethod
-    def addSuccessor(self, successor: object):
+    def addSuccessor(self, successor: object) -> None:
         """
         Appends a successor Node to the list of successors. The
         order of successors is important since it governs the
@@ -138,7 +142,7 @@ class UniformNode(Node):
         super().__init__(id, **kwargs)
         return
 
-    def addSuccessor(self, successor: Node):
+    def addSuccessor(self, successor: Node) -> None:
         """
         Appends a successor Node to the list of successors. Ensures that
         *at most one* successor is `None`.
@@ -173,7 +177,52 @@ class UniformNode(Node):
         return self._successors[randomIndex]
 
 
-# TODO: class GaussianNode(Node)
+class BinomialNode(Node):
+    """
+    KW_P
+    """
+
+    KW_P = "P_VALUE"
 
 
-# TODO: class BetaNode(Node)
+    def __init__(self, id, **kwargs) -> None:
+        super().__init__(id, **kwargs)
+
+        self._p = 0.5
+        try:
+            self._p = float(kwargs[KW_P]))
+        except KeyError as ke:
+            print(type(self).__name__,
+                  "ERROR - Probability value must be specified using the key",
+                  "BinomialNode.P_VALUE", file=stderr)
+            raise ke
+        return
+
+    def addSuccessor(self, successor: Node) -> None:
+        if successor is None:
+            try:
+                # Check if None is already a successor
+                _ = self._successors.index(None)
+            except ValueError:
+                # Add it...
+                pass
+        self._successors.append(successor)
+        return
+
+    def delLastSuccessor(self) -> Node:
+        return self._successors.pop()
+
+    def getSuccessorAt(self, index: int) -> Node:
+        return super().getSuccessorAt(index)
+
+    def getSuccessorAtRandom(self) -> Node:
+        numSuccessors: int = self.getNumSuccessors()
+        
+        if 0 == self.numSuccessors:
+            return None
+
+        p: float = random()
+
+        for idx: int in range(numSuccessors):
+            if p <= binom.cdf(idx, numSuccessors - 1, self._p):
+                return self._successors[idx]
