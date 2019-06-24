@@ -73,10 +73,26 @@ below.
 
 ## Installation
 
+This package has been developed with `Python 3.6.*` and depends on `scipy 1.2.1`.
+Things might not work with `Python 3.7.*` or `scipy 1.3.*`. Therefore, consider
+creating a virtual environment if your default configuration differs.
+
 The latest release is available on PyPi, simply `pip install absynthe`. The
 `master` branch of this repository will always provide the latest release.
 
-For the latest features, checkout the `develop` branch and `pip install .`.
+For the latest features not yet released, clone or download the `develop` branch
+and then:
+
+```bash
+# Change dir to absynthe
+cd /path/to/absynthe
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install absynthe
+pip install .
+```
 
 ## Usage
 
