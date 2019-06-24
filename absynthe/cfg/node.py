@@ -182,19 +182,18 @@ class BinomialNode(Node):
     KW_P
     """
 
-    KW_P = "P_VALUE"
-
+    KW_P_VALUE = "P_VALUE"
 
     def __init__(self, id, **kwargs) -> None:
         super().__init__(id, **kwargs)
 
         self._p = 0.5
         try:
-            self._p = float(kwargs[KW_P]))
+            self._p = float(kwargs[BinomialNode.KW_P_VALUE])
         except KeyError as ke:
             print(type(self).__name__,
                   "ERROR - Probability value must be specified using the key",
-                  "BinomialNode.P_VALUE", file=stderr)
+                  "BinomialNode.KW_P_VALUE", file=stderr)
             raise ke
         return
 
@@ -217,12 +216,12 @@ class BinomialNode(Node):
 
     def getSuccessorAtRandom(self) -> Node:
         numSuccessors: int = self.getNumSuccessors()
-        
-        if 0 == self.numSuccessors:
+
+        if 0 == numSuccessors:
             return None
 
         p: float = random()
 
-        for idx: int in range(numSuccessors):
+        for idx in range(numSuccessors):
             if p <= binom.cdf(idx, numSuccessors - 1, self._p):
                 return self._successors[idx]

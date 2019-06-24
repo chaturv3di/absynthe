@@ -4,7 +4,8 @@ from typing import List
 from random import randint
 
 # Local imports
-from .cfg import Node, LoggerNode, Graph
+from .cfg import Node, Graph
+from .cfg.utils import Utils
 
 # Imports for GraphBuilder
 from abc import ABC, abstractmethod
@@ -13,7 +14,6 @@ import inspect
 
 # Imports for concrete graph builders
 from collections import defaultdict
-from importlib import import_module
 from random import sample
 from math import ceil
 
@@ -57,9 +57,6 @@ class TreeBuilder(GraphBuilder):
     KW_NUM_INNER_NODES = "NUM_INNER_NODES"
     KW_BRANCHING_DEGREE = "BRANCHING_DEGREE"
     KW_SUPPORTED_NODE_TYPES = "SUPPORTED_NODE_TYPES"
-
-    # Node module
-    LOGGER_NODE_MODULE = "absynthe.cfg.logger_node"
 
     def __init__(self, **kwargs: str) -> None:
         """
@@ -136,21 +133,8 @@ class TreeBuilder(GraphBuilder):
             if not inspect.isabstract(obj) and not name == "ABC":
                 self._coreNodeClasses.append(name)
 
-        self._loggerNodeModule = import_module(TreeBuilder.LOGGER_NODE_MODULE)
         # Everything okay, so instantiate object
         return
-
-    def _generateID(self, entityType: str, nodeNum: int) -> str:
-        return "::".join([entityType, str(nodeNum)])
-
-    def _newRandomNode(self, eType: str) -> Node:
-        id = self._generateID(eType, TreeBuilder.numNodes)
-        loggerNodeClassName = self._supportedNodeTypes[randint(0, len(self._supportedNodeTypes) - 1)]
-        coreNodeClassName = self._coreNodeClasses[randint(0, len(self._coreNodeClasses) - 1)]
-        logger_kwargs = {LoggerNode.KW_CORE_CLASS_NAME: coreNodeClassName,
-                         LoggerNode.KW_IGNORE_PARAMS: "False"}
-        TreeBuilder.numNodes += 1
-        return getattr(self._loggerNodeModule, loggerNodeClassName)(id, **logger_kwargs)
 
     def _howManySuccessors(self, succLimit: int = None) -> int:
         """
@@ -196,7 +180,11 @@ class TreeBuilder(GraphBuilder):
                 # Make connections between fromLayer and toLayer
                 succNode: Node = toLayer[succPos]
                 if succNode is None:
-                    succNode = self._newRandomNode("node")
+                    succNode = Utils.newRandomNode("node",
+                                                   TreeBuilder.numNodes,
+                                                   self._supportedNodeTypes,
+                                                   self._coreNodeClasses)
+                    TreeBuilder.numNodes += 1
                     toLayer[succPos] = succNode
                     numNodes += 1
                 node.addSuccessor(succNode)
@@ -225,13 +213,16 @@ class TreeBuilder(GraphBuilder):
         self._nodeLayers: List[List[Node]] = list()
 
         # 1. Create Graph ID.
-        graphID: str = self._generateID("graph", TreeBuilder.numGraphs)
+        graphID: str = Utils.generateID("graph", TreeBuilder.numGraphs)
         graph: Graph = Graph(graphID, self._numRoots)
 
         # 2. Create desired no. of roots.
         rootLayer: List[Node] = list()
         for _ in range(self._numRoots):
-            rNode = self._newRandomNode("root")
+            rNode = Utils.newRandomNode("root", TreeBuilder.numNodes,
+                                        self._supportedNodeTypes,
+                                        self._coreNodeClasses)
+            TreeBuilder.numNodes += 1
             graph.addRoot(rNode)
             rootLayer.append(rNode)
         self._nodeLayers.append(rootLayer)
@@ -260,7 +251,10 @@ class TreeBuilder(GraphBuilder):
         # 4. Create desired no. of leaves (nodes with `None` successors)
         leafLayer: List[Node] = list()
         for _ in range(self._numLeaves):
-            leafLayer.append(self._newRandomNode("leaf"))
+            leafLayer.append(Utils.newRandomNode("leaf", TreeBuilder.numNodes,
+                                                 self._supportedNodeTypes,
+                                                 self._coreNodeClasses))
+            TreeBuilder.numNodes += 1
         _ = self._makeConnections(currLayer, leafLayer, True)
         self._nodeLayers.append(leafLayer)
 
@@ -375,7 +369,10 @@ class DCGBuilder(DAGBuilder):
         currNode: Node = toNode
         loopNode: Node = None
         for _ in range(ofSize):
-            loopNode = self._newRandomNode(entityType)
+            loopNode = Utils.newRandomNode(entityType, DCGBuilder.numNodes,
+                                           self._supportedNodeTypes,
+                                           self._coreNodeClasses)
+            DCGBuilder.numNodes += 1
             currNode.addSuccessor(loopNode)
             currNode = loopNode
 
