@@ -56,7 +56,7 @@ class Node(ABC):
           verbose(bool): If true, then the debug information ought to
                          contain debug information of the successors too.
         """
-        print(printPrefix, self._id)
+        print(printPrefix, self._id, "\b:", type(self).__name__)
         printPrefix += "\t"
         print(printPrefix, "Num Successors:", self.getNumSuccessors())
 
