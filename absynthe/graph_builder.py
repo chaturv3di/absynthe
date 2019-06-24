@@ -179,9 +179,10 @@ class TreeBuilder(GraphBuilder):
             for succPos in succPositions:
                 # Make connections between fromLayer and toLayer
                 succNode: Node = toLayer[succPos]
+                succNodeID: str
                 if succNode is None:
-                    succNode = Utils.newRandomNode("node",
-                                                   TreeBuilder.numNodes,
+                    succNodeID = Utils.generateID("node", TreeBuilder.numNodes)
+                    succNode = Utils.newRandomNode(succNodeID,
                                                    self._supportedNodeTypes,
                                                    self._coreNodeClasses)
                     TreeBuilder.numNodes += 1
@@ -219,7 +220,8 @@ class TreeBuilder(GraphBuilder):
         # 2. Create desired no. of roots.
         rootLayer: List[Node] = list()
         for _ in range(self._numRoots):
-            rNode = Utils.newRandomNode("root", TreeBuilder.numNodes,
+            rNodeID = Utils.generateID("root", TreeBuilder.numNodes,)
+            rNode = Utils.newRandomNode(rNodeID,
                                         self._supportedNodeTypes,
                                         self._coreNodeClasses)
             TreeBuilder.numNodes += 1
@@ -251,7 +253,8 @@ class TreeBuilder(GraphBuilder):
         # 4. Create desired no. of leaves (nodes with `None` successors)
         leafLayer: List[Node] = list()
         for _ in range(self._numLeaves):
-            leafLayer.append(Utils.newRandomNode("leaf", TreeBuilder.numNodes,
+            lNodeID = Utils.generateID("leaf", TreeBuilder.numNodes)
+            leafLayer.append(Utils.newRandomNode(lNodeID,
                                                  self._supportedNodeTypes,
                                                  self._coreNodeClasses))
             TreeBuilder.numNodes += 1
@@ -369,7 +372,8 @@ class DCGBuilder(DAGBuilder):
         currNode: Node = toNode
         loopNode: Node = None
         for _ in range(ofSize):
-            loopNode = Utils.newRandomNode(entityType, DCGBuilder.numNodes,
+            lNodeID = Utils.generateID(entityType, DCGBuilder.numNodes)
+            loopNode = Utils.newRandomNode(lNodeID,
                                            self._supportedNodeTypes,
                                            self._coreNodeClasses)
             DCGBuilder.numNodes += 1
