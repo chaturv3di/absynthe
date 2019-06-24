@@ -179,12 +179,26 @@ class UniformNode(Node):
 
 class BinomialNode(Node):
     """
-    KW_P
+    A concrete implementation of Node class that chooses its successors
+    using a binomial PMF. For example, if a BinomialNode, with the parameter
+    'p' = 0.5, has three successors then it will choose them with
+    probabilities 0.25, 0.5, and 0.25 respectively.
+
+    The second parameter 'n' of the binomial distribution is set
+    automatically from the number of successors that are ultimately assigned
+    to a BinomialNode.
     """
 
+    # Keywords for kwargs expected by the constructor
     KW_P_VALUE = "P_VALUE"
 
     def __init__(self, id, **kwargs) -> None:
+        """
+        Construtor for the class.
+        Args:
+          **kwargs(str): Must have the following keywords.
+            KW_P - Specifying the parameter 'p' of the binomial distribution
+        """
         super().__init__(id, **kwargs)
 
         self._p = 0.5
