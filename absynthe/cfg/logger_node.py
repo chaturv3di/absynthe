@@ -68,12 +68,13 @@ class LoggerNode(Node):
         self._coreNode: Node = None
         try:
             className = kwargs[LoggerNode.KW_CORE_CLASS_NAME]
-            self._coreNode = getattr(nodeModule, className)(coreID, **kwargs)
         except KeyError as ke:
             # A core class name is mandatory...
             print(type(self).__name__, "ERROR: Keyword LoggerNode.KW_CORE_CLASS_NAME not provided",
                   className, file=stderr)
             raise ke
+        try:
+            self._coreNode = getattr(nodeModule, className)(coreID, **kwargs)
         except AttributeError as ae:
             # ...and shoud be a subclass of Node,
             print(type(self).__name__, "ERROR: Not a valid concrete subclass of Node - ",

@@ -24,8 +24,13 @@ process -- whether it's a computer application or a business process flow.
 
 Each business process or compuater application is modelled as a _control flow
 graph_ (or _CFG_), which typically has one or more roots (i.e. entry) nodes and
-multiple leaf (i.e. end) nodes. An example of a CFG generated using Absynthe is
-shown below.
+multiple leaf (i.e. end) nodes.
+
+### Tree-like CFG
+
+An example of a simple, tree-like CFG generated using Absynthe is shown below.
+This is like a tree since nodes are laid out in levels, and nodes at level `i`
+have outgoing edges only to nodes at level `i + 1`.
 
 <img src="imgs/02_exampleCFG.png" width="1000" align="middle" />
 
@@ -46,12 +51,48 @@ which the log message corresponds. A single CFG might participate in multiple
 sessions, where each session is a different traversal of the CFG. Therefore, we
 maintain both session ID and CFG ID in the log line.
 
+### Directed Cyclic CFG
+
+An example of a more complex CFG, a directed cyclic graph, is shown in the
+figure below. It expands the tree-like graph illustrated above by:
+
+1. attaching loops on some of the nodes,
+2. constructing skip-level edges, i.e. edges from a node at level `i` to a
+node at level &ge;`(i + 2)`, and
+3. optionally, upward edges (not shown here), i.e. edges from a node at
+level `i` to a node at level &le;`(i - 1)`.
+
+<img src="imgs/03_exampleDCG.png" width="1000" align="middle" />
+
+The identifiers of nodes appearing loops are helpfully prefixed with the
+identifiers of nodes where these loops start and finish. Moreover, loops could
+be traversed multiple times in a single behavior, as illustrated in the figure
+below.
+
+<img src="imgs/03_exampleLoop.png" width="1000" align="middle" />
+
 ## Installation
+
+This package has been developed with `Python 3.6.*` and depends on `scipy 1.2.1`.
+Things might not work with `Python 3.7.*` or `scipy 1.3.*`. Therefore, consider
+creating a virtual environment if your default configuration differs.
 
 The latest release is available on PyPi, simply `pip install absynthe`. The
 `master` branch of this repository will always provide the latest release.
 
-For the latest features, checkout the `develop` branch and `pip install .`.
+For the latest features not yet released, clone or download the `develop` branch
+and then:
+
+```bash
+# Change dir to absynthe
+cd /path/to/absynthe
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install absynthe
+pip install .
+```
 
 ## Usage
 
@@ -66,7 +107,8 @@ For instance, consider the `basicLogGeneration` method in
 `./examples/01_generateSimpleBehavior.py`:
 
 ```python3
-from absynthe import TreeBuilder, MonospaceInterleaving
+from absynthe.graph_builder import TreeBuilder
+from absynthe.behavior import MonospaceInterleaving
 
 
 def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
@@ -109,8 +151,35 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
     return
 ```
 
-## Comping Up...
+In order to generate behaviors from a directed cyclic CFG, create a DCG as shown
+in `./examples/03_generateControlFlowDCG.py` and then generate behaviors after
+adding the DCG to a behavior object as shown in the code snippet above.
 
-Sophisticated behaviors, complex graphs with loops, nodes whose successors are
-chosen from non-uniform distributions, logger nodes that emit more _life like_
-messages.
+**Note:** When generating a behavior, i.e. when traversing a graph, successors
+of nodes are chosen based on the probability distributions associated with those
+nodes. Different nodes rely on different distributions and these nodes are
+randomly assigned in the graphs that are constructed by `generateNewGraph()`
+methods, resulting in graphs with a mix of nodes.
+
+## Release Notes
+
+**Note:** This tool is still in alpha stage, so backward compatibility is not
+guaranteed between releases. However, inasmuch as users stick to graph builders'
+`generateNewGraph()` methods, they will stay away from compatibility problems.
+
+### Major changes in v0.0.2
+
+1. Added new graph builders, viz. `DAGBuilder` and  `DCGBuilder`, which build
+CFGs with skip-level edges and loops respectively.
+2. Added new node, viz. `BinomialNode`, which exploits the binomial distribution
+in order to select its successors at the time of graph traversal.
+3. Added a separate utility class called `Utils` in `absynthe.cfg.utils.py` to
+create a new `Node` object from any of the concrete implementations of `Node` at
+random. All concrete implementations of `Node` therefore transparently available
+to graph builders (and everyone else) through this utility.
+
+### Coming up in future releases
+
+1. Sophisticated interleaving behaviors
+2. Logger nodes that emit more _life like_ log messages
+3. *Anomalous* behaviors
