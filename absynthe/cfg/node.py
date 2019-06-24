@@ -7,6 +7,10 @@ from abc import ABC, abstractmethod
 # Imports for UniformNode
 from random import randint
 
+# Import for BinomialNode
+from scipy.stats import binom
+from random import random
+
 
 class Node(ABC):
     """
@@ -67,7 +71,7 @@ class Node(ABC):
     # Abstract methods
 
     @abstractmethod
-    def addSuccessor(self, successor: object):
+    def addSuccessor(self, successor: object) -> None:
         """
         Appends a successor Node to the list of successors. The
         order of successors is important since it governs the
@@ -138,7 +142,7 @@ class UniformNode(Node):
         super().__init__(id, **kwargs)
         return
 
-    def addSuccessor(self, successor: Node):
+    def addSuccessor(self, successor: Node) -> None:
         """
         Appends a successor Node to the list of successors. Ensures that
         *at most one* successor is `None`.
@@ -173,7 +177,73 @@ class UniformNode(Node):
         return self._successors[randomIndex]
 
 
-# TODO: class GaussianNode(Node)
+class BinomialNode(Node):
+    """
+    A concrete implementation of Node class that chooses its successors
+    using a binomial PMF. For example, if a BinomialNode, with the parameter
+    'p' = 0.5, has three successors then it will choose them with
+    probabilities 0.25, 0.5, and 0.25 respectively.
 
+    The second parameter 'n' of the binomial distribution is set
+    automatically from the number of successors that are ultimately assigned
+    to a BinomialNode.
+    """
 
-# TODO: class BetaNode(Node)
+    # Keywords for kwargs expected by the constructor
+    KW_P_VALUE = "P_VALUE"
+
+    def __init__(self, id, **kwargs) -> None:
+        """
+        Construtor for the class.
+        Args:
+          **kwargs(str): Must have the following keywords.
+            KW_P - Specifying the parameter 'p' of the binomial distribution
+        """
+        super().__init__(id, **kwargs)
+
+        self._p = 0.5
+        try:
+            self._p = float(kwargs[BinomialNode.KW_P_VALUE])
+        except KeyError as ke:
+            print(type(self).__name__,
+                  "ERROR - Probability value must be specified using the key",
+                  "BinomialNode.KW_P_VALUE", file=stderr)
+            raise ke
+        return
+
+    def addSuccessor(self, successor: Node) -> None:
+        if successor is None:
+            try:
+                # Check if None is already a successor
+                _ = self._successors.index(None)
+            except ValueError:
+                # Add it...
+                pass
+        self._successors.append(successor)
+        return
+
+    def delLastSuccessor(self) -> Node:
+        return self._successors.pop()
+
+    def getSuccessorAt(self, index: int) -> Node:
+        return super().getSuccessorAt(index)
+
+    def getSuccessorAtRandom(self) -> Node:
+        """
+        Returns:
+          Node - A successor Node chosen according to the binomial
+                 distribution parameterized by (n, p), where 'n' is the
+                 number of successors of this node, and 'p' is provided in
+                 the constructor. The probability of selecting a successor
+                 at position k is pmf(k, n - 1, p), where 0 <= k <= n - 1.
+        """
+        numSuccessors: int = self.getNumSuccessors()
+
+        if 0 == numSuccessors:
+            return None
+
+        p: float = random()
+
+        for idx in range(numSuccessors):
+            if p <= binom.cdf(idx, numSuccessors - 1, self._p):
+                return self._successors[idx]
