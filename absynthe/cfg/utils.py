@@ -4,7 +4,7 @@ from typing import List
 from random import randint
 from importlib import import_module
 
-from absynthe.cfg import Node, BinomialNode
+from absynthe.cfg import BinomialNode
 from absynthe.cfg import LoggerNode
 
 

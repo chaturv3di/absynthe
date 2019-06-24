@@ -73,10 +73,26 @@ below.
 
 ## Installation
 
+This package has been developed with `Python 3.6.*` and depends on `scipy 1.2.1`.
+Things might not work with `Python 3.7.*` or `scipy 1.3.*`. Therefore, consider
+creating a virtual environment if your default configuration differs.
+
 The latest release is available on PyPi, simply `pip install absynthe`. The
 `master` branch of this repository will always provide the latest release.
 
-For the latest features, checkout the `develop` branch and `pip install .`.
+For the latest features not yet released, clone or download the `develop` branch
+and then:
+
+```bash
+# Change dir to absynthe
+cd /path/to/absynthe
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install absynthe
+pip install .
+```
 
 ## Usage
 
@@ -139,17 +155,31 @@ In order to generate behaviors from a directed cyclic CFG, create a DCG as shown
 in `./examples/03_generateControlFlowDCG.py` and then generate behaviors after
 adding the DCG to a behavior object as shown in the code snippet above.
 
-## Comping Up...
+**Note:** When generating a behavior, i.e. when traversing a graph, successors
+of nodes are chosen based on the probability distributions associated with those
+nodes. Different nodes rely on different distributions and these nodes are
+randomly assigned in the graphs that are constructed by `generateNewGraph()`
+methods, resulting in graphs with a mix of nodes.
 
-### ...in v0.0.2
+## Release Notes
 
-1. In `absynthe.graph_builder`, `DAGBuilder` and  `DCGBuilder` classes, which
-build CFGs with skip-level edges and loops respectively.
-2. In `absynthe.cfg.node`, `GaussianNode` and `BetaNode` classes, which exploit
-the Gaussian and beta distributions, respectively, to select successor nodes at
-the time of traversal.
+**Note:** This tool is still in alpha stage, so backward compatibility is not
+guaranteed between releases. However, inasmuch as users stick to graph builders'
+`generateNewGraph()` methods, they will stay away from compatibility problems.
 
-### ...eventually
+### Major changes in v0.0.2
 
-Sophisticated interleaving behaviors; logger nodes that emit more _life like_
-log messages.
+1. Added new graph builders, viz. `DAGBuilder` and  `DCGBuilder`, which build
+CFGs with skip-level edges and loops respectively.
+2. Added new node, viz. `BinomialNode`, which exploits the binomial distribution
+in order to select its successors at the time of graph traversal.
+3. Added a separate utility class called `Utils` in `absynthe.cfg.utils.py` to
+create a new `Node` object from any of the concrete implementations of `Node` at
+random. All concrete implementations of `Node` therefore transparently available
+to graph builders (and everyone else) through this utility.
+
+### Coming up in future releases
+
+1. Sophisticated interleaving behaviors
+2. Logger nodes that emit more _life like_ log messages
+3. *Anomalous* behaviors
