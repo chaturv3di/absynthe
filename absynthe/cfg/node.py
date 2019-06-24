@@ -229,6 +229,14 @@ class BinomialNode(Node):
         return super().getSuccessorAt(index)
 
     def getSuccessorAtRandom(self) -> Node:
+        """
+        Returns:
+          Node - A successor Node chosen according to the binomial
+                 distribution parameterized by (n, p), where 'n' is the
+                 number of successors of this node, and 'p' is provided in
+                 the constructor. The probability of selecting a successor
+                 at position k is pmf(k, n - 1, p), where 0 <= k <= n - 1.
+        """
         numSuccessors: int = self.getNumSuccessors()
 
         if 0 == numSuccessors:
