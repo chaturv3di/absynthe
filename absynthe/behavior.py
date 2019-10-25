@@ -1,6 +1,6 @@
 from __future__ import print_function
 from typing import List
-from random import randint
+from random import randint, sample
 from datetime import datetime
 
 from .cfg import LoggerNode, Graph
@@ -16,23 +16,59 @@ class Behavior(ABC):
         pass
 
     @abstractmethod
-    def synthesize(self, numRuns: int) -> None:
+    def synthesize(self, numRuns: int, withSessionID: bool) -> None:
         pass
 
 
-class MonospaceInterleaving(Behavior):
+class MonospaceSimple(Behavior):
 
-    def __init__(self, withSessions: bool = False):
+    def __init__(self):
         self._cfgList: List[Graph] = list()
         self._fixedTimeDelta: float = 0.05
-        self._inclSessionID: bool = withSessions
         return
 
     def addGraph(self, graph: Graph) -> None:
         self._cfgList.append(graph)
         return
 
-    def synthesize(self, numRuns: int = 100):
+    def synthesize(self, numRuns: int = 100, withSessionID: bool = False):
+        numGraphs: int = len(self._cfgList)
+        graphIdx: int = -1
+        wallClock: float = -2.5
+        for i in range(numRuns):  # Complete a traversal of each graph
+            graphOrder: List[int] = sample(range(numGraphs), numGraphs)
+            wallClock += 2.5  # Adding time delay between successive runs
+            for graphIdx in graphOrder:
+                graph: Graph = self._cfgList[graphIdx]
+                node: LoggerNode = graph.getRootAtRandom()
+
+                while node is not None:
+                    timeStamp: str = str(datetime.fromtimestamp(wallClock))
+                    sessionID: str = ""
+                    if withSessionID:
+                        sessionID = "_".join(["SESSION", str(i), str(graphIdx)])
+
+                    # For the sake of better readability of logs, append
+                    # graph ID to the time stamp.
+                    logPrefix: str = " ".join([timeStamp, sessionID, graph.getID()])
+                    yield node.logInfo(logPrefix, None)
+
+                    wallClock += self._fixedTimeDelta
+                    node = node.getSuccessorAtRandom()
+
+
+class MonospaceInterleaving(Behavior):
+
+    def __init__(self):
+        self._cfgList: List[Graph] = list()
+        self._fixedTimeDelta: float = 0.05
+        return
+
+    def addGraph(self, graph: Graph) -> None:
+        self._cfgList.append(graph)
+        return
+
+    def synthesize(self, numRuns: int = 100, withSessionID: bool = False):
         numGraphs: int = len(self._cfgList)
         nextNodeOf: List[LoggerNode] = None
         graphIdx: int = -1
@@ -52,7 +88,7 @@ class MonospaceInterleaving(Behavior):
 
                 timeStamp: str = str(datetime.fromtimestamp(wallClock))
                 sessionID: str = ""
-                if self._inclSessionID:
+                if withSessionID:
                     sessionID = "_".join(["SESSION", str(i), str(graphIdx)])
 
                 # For the sake of better readability of logs, append
