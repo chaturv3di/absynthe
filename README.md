@@ -138,10 +138,9 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
     # behaviors that it will synthesize would essentially
     # be interleavings of simultaneous traversals of all
     # these graphs.
-    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
-    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
-    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
-    exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
+    for _ in range(4):
+        # Add 4 graphs to the behavior
+        exBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
 
     # Specify how many behaviors are to be synthesized,
     # and get going.
