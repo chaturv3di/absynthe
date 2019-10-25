@@ -2,7 +2,35 @@ import unittest
 import os
 
 from absynthe.graph_builder import TreeBuilder, DCGBuilder
-from absynthe.behavior import MonospaceInterleaving
+from absynthe.behavior import MonospaceSimple, MonospaceInterleaving
+
+
+class test_monospaceSimple(unittest.TestCase):
+
+    def test_DCGLogGeneration(self):
+        dcg_kwargs = {DCGBuilder.KW_NUM_ROOTS: "2",
+                      DCGBuilder.KW_NUM_LEAVES: "1",
+                      DCGBuilder.KW_BRANCHING_DEGREE: "2",
+                      DCGBuilder.KW_NUM_INNER_NODES: "16",
+                      DCGBuilder.KW_SUPPORTED_NODE_TYPES: "SimpleLoggerNode"}
+
+        simpleDCGBuilder = DCGBuilder(**dcg_kwargs)
+
+        testBehavior = MonospaceSimple()
+        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
+        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
+        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
+        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
+
+        wSessionID: bool = False
+        fileName = os.path.dirname(os.getcwd() +
+                                   "/test/resources/") + "/DCG_MonospaceSimple_test.log"
+        with open(fileName, 'w') as logfile:
+            for logLine in testBehavior.synthesize(2, wSessionID):
+                logfile.write(logLine)
+                logfile.write(os.linesep)
+
+        return
 
 
 class test_monospaceInterleaving(unittest.TestCase):
