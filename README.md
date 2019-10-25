@@ -7,9 +7,9 @@
 Absynthe came about in response to the need for test data for analysizing the
 performance and accuracy of log analysis algorithms. Even though plenty of real
 life logs are available, e.g. `/var/log/` in unix-based laptops, they do not
-serve the purpose of test data. For that, we need labels, which are difficult
-to obtain without an understanding of the core application logic that is
-generating these logs.
+serve the purpose of test data. For that, we need **labels**, which are
+difficult to obtain without an understanding the source code of the applications
+that are generating these logs.
 
 A more interesting situation arises while trying to test log analytic (and
 anomaly detection) solutions for distributed applications where multiple
