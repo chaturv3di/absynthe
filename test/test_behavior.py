@@ -17,10 +17,8 @@ class test_monospaceSimple(unittest.TestCase):
         simpleDCGBuilder = DCGBuilder(**dcg_kwargs)
 
         testBehavior = MonospaceSimple()
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
+        for _ in range(4):
+            testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
 
         wSessionID: bool = False
         fileName = os.path.dirname(os.getcwd() +
@@ -45,10 +43,8 @@ class test_monospaceInterleaving(unittest.TestCase):
         simpleTreeBuilder = TreeBuilder(**tree_kwargs)
 
         testBehavior = MonospaceInterleaving()
-        testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
+        for _ in range(4):
+            testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
 
         wSessionID: bool = True
         fileName = os.path.dirname(os.getcwd() +
@@ -70,10 +66,8 @@ class test_monospaceInterleaving(unittest.TestCase):
         simpleDCGBuilder = DCGBuilder(**dcg_kwargs)
 
         testBehavior = MonospaceInterleaving()
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
-        testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
+        for _ in range(4):
+            testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
 
         wSessionID: bool = False
         fileName = os.path.dirname(os.getcwd() +
