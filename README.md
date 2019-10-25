@@ -7,8 +7,9 @@
 Absynthe came about in response to the need for test data for analysizing the
 performance and accuracy of log analysis algorithms. Even though plenty of real
 life logs are available, e.g. `/var/log/` in unix-based laptops, they do not
-serve the purpose of test data. For that, we need to understand the core
-application logic that is generating these logs.
+serve the purpose of test data. For that, we need labels, which are difficult
+to obtain without an understanding of the core application logic that is
+generating these logs.
 
 A more interesting situation arises while trying to test log analytic (and
 anomaly detection) solutions for distributed applications where multiple
@@ -77,9 +78,9 @@ This package has been developed with `Python 3.6.*` and depends on `scipy 1.2.1`
 Things might not work with `Python 3.7.*` or `scipy 1.3.*`. Therefore, consider
 creating a virtual environment if your default configuration differs.
 
-The latest release is available on PyPi, simply `pip install absynthe`. The
-`master` branch of this repository will always provide the latest release.
+The latest release is available on PyPi, simply `pip install absynthe`.
 
+The `master` branch of this repository will always provide the latest release.
 For the latest features not yet released, clone or download the `develop` branch
 and then:
 
