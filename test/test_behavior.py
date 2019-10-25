@@ -28,6 +28,13 @@ class test_monospaceSimple(unittest.TestCase):
                 logfile.write(logLine)
                 logfile.write(os.linesep)
 
+            # Now generate logs with session IDs, using the same graphs
+            wSessionID = True
+            logfile.write("===========\n===========\n\n")
+            for logLine in testBehavior.synthesize(2, wSessionID):
+                logfile.write(logLine)
+                logfile.write(os.linesep)
+
         return
 
 
