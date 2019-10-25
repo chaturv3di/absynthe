@@ -16,17 +16,17 @@ class test_monospaceInterleaving(unittest.TestCase):
 
         simpleTreeBuilder = TreeBuilder(**tree_kwargs)
 
-        wSessionID: bool = True
-        testBehavior = MonospaceInterleaving(wSessionID)
+        testBehavior = MonospaceInterleaving()
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
         testBehavior.addGraph(simpleTreeBuilder.generateNewGraph())
 
+        wSessionID: bool = True
         fileName = os.path.dirname(os.getcwd() +
                                    "/test/resources/") + "/Tree_MonospaceInterleaving_test.log"
         with open(fileName, 'w') as logfile:
-            for logLine in testBehavior.synthesize(2):
+            for logLine in testBehavior.synthesize(2, wSessionID):
                 logfile.write(logLine)
                 logfile.write(os.linesep)
 
@@ -41,17 +41,17 @@ class test_monospaceInterleaving(unittest.TestCase):
 
         simpleDCGBuilder = DCGBuilder(**dcg_kwargs)
 
-        wSessionID: bool = True
-        testBehavior = MonospaceInterleaving(wSessionID)
+        testBehavior = MonospaceInterleaving()
         testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
         testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
         testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
         testBehavior.addGraph(simpleDCGBuilder.generateNewGraph())
 
+        wSessionID: bool = False
         fileName = os.path.dirname(os.getcwd() +
                                    "/test/resources/") + "/DCG_MonospaceInterleaving_test.log"
         with open(fileName, 'w') as logfile:
-            for logLine in testBehavior.synthesize(2):
+            for logLine in testBehavior.synthesize(2, wSessionID):
                 logfile.write(logLine)
                 logfile.write(os.linesep)
 

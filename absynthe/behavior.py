@@ -16,23 +16,22 @@ class Behavior(ABC):
         pass
 
     @abstractmethod
-    def synthesize(self, numRuns: int) -> None:
+    def synthesize(self, numRuns: int, withSessionID: bool) -> None:
         pass
 
 
 class MonospaceInterleaving(Behavior):
 
-    def __init__(self, withSessions: bool = False):
+    def __init__(self):
         self._cfgList: List[Graph] = list()
         self._fixedTimeDelta: float = 0.05
-        self._inclSessionID: bool = withSessions
         return
 
     def addGraph(self, graph: Graph) -> None:
         self._cfgList.append(graph)
         return
 
-    def synthesize(self, numRuns: int = 100):
+    def synthesize(self, numRuns: int = 100, withSessionID: bool = False):
         numGraphs: int = len(self._cfgList)
         nextNodeOf: List[LoggerNode] = None
         graphIdx: int = -1
@@ -52,7 +51,7 @@ class MonospaceInterleaving(Behavior):
 
                 timeStamp: str = str(datetime.fromtimestamp(wallClock))
                 sessionID: str = ""
-                if self._inclSessionID:
+                if withSessionID:
                     sessionID = "_".join(["SESSION", str(i), str(graphIdx)])
 
                 # For the sake of better readability of logs, append
