@@ -29,5 +29,5 @@ setup(
     python_requires = ">=3.6.0",
     install_requires = [
         'scipy==1.2.1',
-        'numpy==1.16.4'],
+        'numpy==1.22.0'],
     )
