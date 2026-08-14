@@ -1,6 +1,6 @@
 # Repo Revival & Modernization Plan
 
-**Status:** Approved — ready for implementation.
+**Status:** Complete — v0.1.0 released 2026-08-14 (https://pypi.org/project/absynthe/0.1.0/).
 **Scope:** Infrastructure/tooling revival only. One exception (see decisions table). No other
 behavioral/logic changes, no new features.
 

@@ -2,11 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Note on scope:** This file describes the *target* workflow for absynthe once the revival/modernization
-plan in [`plans/2026-08-13-repo-revival-and-modernization.md`](./plans/2026-08-13-repo-revival-and-modernization.md)
-has been implemented (pyproject.toml, `uv`, `ruff`, `mypy`, `pytest`, GitHub Actions). Until that plan is
-executed, some referenced files (`pyproject.toml`, `.github/workflows/`, `tests/`) do not exist yet —
-consult the plan document for the current migration status.
+This describes the repo's actual workflow (`pyproject.toml`, `uv`, `ruff`, `mypy`, `pytest`, GitHub
+Actions) as of the v0.1.0 revival release. See
+[`plans/2026-08-13-repo-revival-and-modernization.md`](./plans/2026-08-13-repo-revival-and-modernization.md)
+for how it got there.
 
 ## Project Overview
 
@@ -45,10 +44,11 @@ examples/                       # Runnable usage examples (01 tree, 02 tree+DCG,
 imgs/                            # Diagrams referenced from README.md
 ```
 
-**Caution — `absynthe/__init__.py`:** as of the last audit, top-level re-exports in this file were
-commented out (users must `import absynthe.graph_builder` / `absynthe.behavior` directly rather than
-`import absynthe`). Do not silently "fix" this by uncommenting or restructuring exports — if you think
-it's a bug, ask first, since it changes the public API surface.
+**`absynthe/__init__.py` has no top-level re-exports — this is intentional.** Users import via
+`from absynthe.graph_builder import TreeBuilder` / `from absynthe.behavior import
+MonospaceInterleaving`, not `import absynthe`. This deliberately follows the scikit-learn-style
+convention of deep, module-qualified imports rather than a flat top-level namespace. Do not add
+re-exports to `absynthe/__init__.py` to "fix" this.
 
 ## Development Instructions
 Strictly follow the instructions in the relevant section(s).
