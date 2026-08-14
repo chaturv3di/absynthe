@@ -80,9 +80,8 @@ creating a virtual environment if your default configuration differs.
 
 The latest release is available on PyPi, simply `pip install absynthe`.
 
-The `master` branch of this repository will always provide the latest release.
-For the latest features not yet released, clone or download the `develop` branch
-and then:
+The `main` branch of this repository always contains the latest source, including any
+changes merged since the last tagged release. To install from source:
 
 ```bash
 # Change dir to absynthe
