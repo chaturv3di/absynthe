@@ -22,7 +22,7 @@ class test_monospaceSimple(unittest.TestCase):
 
         wSessionID: bool = False
         fileName = os.path.dirname(os.getcwd() +
-                                   "/test/resources/") + "/DCG_MonospaceSimple_test.log"
+                                   "/tests/resources/") + "/DCG_MonospaceSimple_test.log"
         with open(fileName, 'w') as logfile:
             for logLine in testBehavior.synthesize(2, wSessionID):
                 logfile.write(logLine)
@@ -55,7 +55,7 @@ class test_monospaceInterleaving(unittest.TestCase):
 
         wSessionID: bool = True
         fileName = os.path.dirname(os.getcwd() +
-                                   "/test/resources/") + "/Tree_MonospaceInterleaving_test.log"
+                                   "/tests/resources/") + "/Tree_MonospaceInterleaving_test.log"
         with open(fileName, 'w') as logfile:
             for logLine in testBehavior.synthesize(2, wSessionID):
                 logfile.write(logLine)
@@ -78,7 +78,7 @@ class test_monospaceInterleaving(unittest.TestCase):
 
         wSessionID: bool = False
         fileName = os.path.dirname(os.getcwd() +
-                                   "/test/resources/") + "/DCG_MonospaceInterleaving_test.log"
+                                   "/tests/resources/") + "/DCG_MonospaceInterleaving_test.log"
         with open(fileName, 'w') as logfile:
             for logLine in testBehavior.synthesize(2, wSessionID):
                 logfile.write(logLine)

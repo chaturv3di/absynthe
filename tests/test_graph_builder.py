@@ -17,7 +17,7 @@ class TreeBuilderTest(unittest.TestCase):
         testTreeBuilder = TreeBuilder(**tree_kwargs)
         testTree: Graph = testTreeBuilder.generateNewGraph()
         fileName = os.path.dirname(os.getcwd()
-                                   + "/test/resources/") + "/TreeBuilder_test_TreeDump.gv"
+                                   + "/tests/resources/") + "/TreeBuilder_test_TreeDump.gv"
         with open(fileName, 'w') as f:
             testTree.dumpDotFile(f)
         return
@@ -32,7 +32,7 @@ class TreeBuilderTest(unittest.TestCase):
         testDAGBuilder = DAGBuilder(**cfg_kwargs)
         testDAG: Graph = testDAGBuilder.generateNewGraph()
         fileName = os.path.dirname(os.getcwd()
-                                   + "/test/resources/") + "/DAGBuilder_test_DAGDump.gv"
+                                   + "/tests/resources/") + "/DAGBuilder_test_DAGDump.gv"
         with open(fileName, 'w') as f:
             testDAG.dumpDotFile(f)
         return
@@ -47,7 +47,7 @@ class TreeBuilderTest(unittest.TestCase):
         testDCGBuilder = DCGBuilder(**cfg_kwargs)
         testDCG: Graph = testDCGBuilder.generateNewGraph()
         fileName = os.path.dirname(os.getcwd()
-                                   + "/test/resources/") + "/DCGBuilder_test_DCGDump.gv"
+                                   + "/tests/resources/") + "/DCGBuilder_test_DCGDump.gv"
         with open(fileName, 'w') as f:
             testDCG.dumpDotFile(f)
         return
