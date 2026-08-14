@@ -1,21 +1,18 @@
-from __future__ import print_function
-from sys import stderr
-from typing import List
-from random import randint
-
-# Local imports
-from .cfg import Node, Graph
-from .cfg.utils import Utils
+import inspect
 
 # Imports for GraphBuilder
 from abc import ABC, abstractmethod
-from sys import modules
-import inspect
 
 # Imports for concrete graph builders
 from collections import defaultdict
-from random import sample
 from math import ceil
+from random import randint, sample
+from sys import modules, stderr
+from typing import cast
+
+# Local imports
+from .cfg import Graph, Node
+from .cfg.utils import Utils
 
 
 class GraphBuilder(ABC):
@@ -37,7 +34,7 @@ class GraphBuilder(ABC):
         pass
 
     @abstractmethod
-    def generateNewGraph(self, **kwargs: str) -> Graph:
+    def generateNewGraph(self) -> Graph:
         """
         Generates a new graph adhering to the arguments specified by the kwargs
         in the constructor. Each invocation of this method can potentially
@@ -76,8 +73,8 @@ class TreeBuilder(GraphBuilder):
         self._numInnerNodes: int = 0
         self._branchingDegree: int = 0
         self._deltaRange: int = 0
-        self._supportedNodeTypes: List[str] = None
-        self._rootList: List[Node] = None
+        self._supportedNodeTypes: list[str]
+        self._rootList: list[Node]
 
         className: str = type(self).__name__
         try:
@@ -136,7 +133,7 @@ class TreeBuilder(GraphBuilder):
         # Everything okay, so instantiate object
         return
 
-    def _howManySuccessors(self, succLimit: int = None) -> int:
+    def _howManySuccessors(self, succLimit: int | None = None) -> int:
         """
         Randomly generate the number indicating how many successors a node will have. The
         following possibilities are equally likely:
@@ -157,7 +154,7 @@ class TreeBuilder(GraphBuilder):
         theseMany = self._branchingDegree + delta
         return theseMany
 
-    def _makeConnections(self, fromLayer: List[Node], toLayer: List[Node],
+    def _makeConnections(self, fromLayer: list[Node], toLayer: list[Node | None],
                          toLeafLayer: bool = False) -> int:
         """
         Except when toLeafLayer is True, it is possible that some of the nodes in toLayer
@@ -178,7 +175,7 @@ class TreeBuilder(GraphBuilder):
 
             for succPos in succPositions:
                 # Make connections between fromLayer and toLayer
-                succNode: Node = toLayer[succPos]
+                succNode: Node | None = toLayer[succPos]
                 succNodeID: str
                 if succNode is None:
                     succNodeID = Utils.generateID("node", TreeBuilder.numNodes)
@@ -211,14 +208,14 @@ class TreeBuilder(GraphBuilder):
                  in the constructor.
         """
         TreeBuilder.numGraphs += 1
-        self._nodeLayers: List[List[Node]] = list()
+        self._nodeLayers: list[list[Node]] = list()
 
         # 1. Create Graph ID.
         graphID: str = Utils.generateID("graph", TreeBuilder.numGraphs)
         graph: Graph = Graph(graphID, self._numRoots)
 
         # 2. Create desired no. of roots.
-        rootLayer: List[Node] = list()
+        rootLayer: list[Node] = list()
         for _ in range(self._numRoots):
             rNodeID = Utils.generateID("root", TreeBuilder.numNodes,)
             rNode = Utils.newRandomNode(rNodeID,
@@ -231,8 +228,10 @@ class TreeBuilder(GraphBuilder):
 
         balNumInnerNodes: int = self._numInnerNodes
         # 3. For each currLayer, starting with roots
-        currLayer: List[Node] = rootLayer
-        nextLayer: List[Node] = [None] * self._numRoots * (self._branchingDegree + self._deltaRange)
+        currLayer: list[Node] = rootLayer
+        nextLayer: list[Node | None] | None = cast(
+            "list[Node | None]",
+            [None] * self._numRoots * (self._branchingDegree + self._deltaRange))
         while(nextLayer is not None):
             balNumInnerNodes -= self._makeConnections(currLayer, nextLayer)
             try:
@@ -242,23 +241,26 @@ class TreeBuilder(GraphBuilder):
                     nextLayer.remove(None)
             except ValueError:
                 # nextLayer is free from None nodes
-                self._nodeLayers.append(nextLayer)
-                currLayer = nextLayer
+                cleanLayer = cast("list[Node]", nextLayer)
+                self._nodeLayers.append(cleanLayer)
+                currLayer = cleanLayer
 
             if (0 >= balNumInnerNodes):
                 nextLayer = None
             else:
-                nextLayer = [None] * len(currLayer) * (self._branchingDegree + self._deltaRange)
+                nextLayer = cast(
+                    "list[Node | None]",
+                    [None] * len(currLayer) * (self._branchingDegree + self._deltaRange))
 
         # 4. Create desired no. of leaves (nodes with `None` successors)
-        leafLayer: List[Node] = list()
+        leafLayer: list[Node] = list()
         for _ in range(self._numLeaves):
             lNodeID = Utils.generateID("leaf", TreeBuilder.numNodes)
             leafLayer.append(Utils.newRandomNode(lNodeID,
                                                  self._supportedNodeTypes,
                                                  self._coreNodeClasses))
             TreeBuilder.numNodes += 1
-        _ = self._makeConnections(currLayer, leafLayer, True)
+        _ = self._makeConnections(currLayer, cast("list[Node | None]", leafLayer), True)
         self._nodeLayers.append(leafLayer)
 
         return graph
@@ -308,7 +310,7 @@ class DAGBuilder(TreeBuilder):
             return graph
 
         # Randomly choose levels from where some node will have an outgoing skip-edge
-        fromLevels: List[int] = sample(range(numLevels - 2),
+        fromLevels: list[int] = sample(range(numLevels - 2),
                                        numLevels // self._skipFraction)
         numNodesInLevel: int = 0
         for level in fromLevels:
@@ -370,7 +372,7 @@ class DCGBuilder(DAGBuilder):
     def _attachLoop(self, toNode: Node, ofSize: int) -> None:
         entityType: str = "loop_" + toNode.getID()
         currNode: Node = toNode
-        loopNode: Node = None
+        loopNode: Node
         for _ in range(ofSize):
             lNodeID = Utils.generateID(entityType, DCGBuilder.numNodes)
             loopNode = Utils.newRandomNode(lNodeID,
@@ -415,7 +417,7 @@ class DCGBuilder(DAGBuilder):
             return graph
 
         # 3. Randomly add few reverse edges
-        fromLevels: List[int] = sample(range(2, numLevels - 1),
+        fromLevels: list[int] = sample(range(2, numLevels - 1),
                                        numLevels // self._skipFraction)
         for level in fromLevels:
             # For each level in the random list created above,
@@ -429,7 +431,7 @@ class DCGBuilder(DAGBuilder):
             numNodesInLevel = len(self._nodeLayers[toLevel])
             # In the said upper level, randomly select a node
             # that will receive the skip-edge
-            toNode: Node = self._nodeLayers[toLevel][randint(0, numNodesInLevel - 1)]
+            toNode = self._nodeLayers[toLevel][randint(0, numNodesInLevel - 1)]
             fromNode.addSuccessor(toNode)
 
         return graph

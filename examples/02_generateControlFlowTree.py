@@ -1,5 +1,5 @@
-import sys
 import argparse
+import sys
 
 from absynthe.graph_builder import TreeBuilder
 
@@ -44,7 +44,7 @@ if "__main__" == __name__:
     args = argParser.parse_args()
 
     r: int = args.num_roots
-    l: int = args.num_leaves
+    numLeaves: int = args.num_leaves
     n: int = args.num_nodes
     b: int = args.branching
-    treeGeneration(r, l, b, n)
+    treeGeneration(r, numLeaves, b, n)

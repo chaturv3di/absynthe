@@ -1,15 +1,13 @@
-from __future__ import print_function
-from sys import stderr
-
 # Imports for Node
 from abc import ABC, abstractmethod
 
 # Imports for UniformNode
-from random import randint
+from random import randint, random
+from sys import stderr
+from typing import cast
 
 # Import for BinomialNode
 from scipy.stats import binom
-from random import random
 
 
 class Node(ABC):
@@ -29,7 +27,7 @@ class Node(ABC):
                    choice of successors.
         """
         self._id = id
-        self._successors = list()
+        self._successors: list[Node | None] = list()
         return
 
     # Concrete methods
@@ -61,7 +59,7 @@ class Node(ABC):
         print(printPrefix, "Num Successors:", self.getNumSuccessors())
 
         for i in range(self.getNumSuccessors()):
-            successor = self.getSuccessorAt(i)
+            successor = cast(Node, self.getSuccessorAt(i))
             if verbose:
                 successor.printDebugInfo(printPrefix=printPrefix)
             else:
@@ -71,7 +69,7 @@ class Node(ABC):
     # Abstract methods
 
     @abstractmethod
-    def addSuccessor(self, successor: object) -> None:
+    def addSuccessor(self, successor: "Node | None") -> None:
         """
         Appends a successor Node to the list of successors. The
         order of successors is important since it governs the
@@ -91,7 +89,7 @@ class Node(ABC):
         pass
 
     @abstractmethod
-    def delLastSuccessor(self) -> object:
+    def delLastSuccessor(self) -> "Node | None":
         """
         Delete the last successor that was added using the
         addSuccessor() method.
@@ -99,7 +97,7 @@ class Node(ABC):
         pass
 
     @abstractmethod
-    def getSuccessorAt(self, index: int) -> object:
+    def getSuccessorAt(self, index: int) -> "Node | None":
         """
         If the successors of this node are stored in an ordered list or,
         equivalently, uniquely mapped to 0-indexed integers, then this
@@ -120,7 +118,7 @@ class Node(ABC):
             raise error
 
     @abstractmethod
-    def getSuccessorAtRandom(self) -> object:
+    def getSuccessorAtRandom(self) -> "Node | None":
         """
         This method captures the probability distribution that governs
         the choice of successors while a behaviour is being synthesized.
@@ -142,7 +140,7 @@ class UniformNode(Node):
         super().__init__(id, **kwargs)
         return
 
-    def addSuccessor(self, successor: Node) -> None:
+    def addSuccessor(self, successor: Node | None) -> None:
         """
         Appends a successor Node to the list of successors. Ensures that
         *at most one* successor is `None`.
@@ -158,7 +156,7 @@ class UniformNode(Node):
         self._successors.append(successor)
         return
 
-    def delLastSuccessor(self) -> Node:
+    def delLastSuccessor(self) -> Node | None:
         """
         Returns:
           Node: The last successor node that was added via
@@ -166,10 +164,10 @@ class UniformNode(Node):
         """
         return self._successors.pop()
 
-    def getSuccessorAt(self, index: int) -> Node:
+    def getSuccessorAt(self, index: int) -> Node | None:
         return super().getSuccessorAt(index)
 
-    def getSuccessorAtRandom(self) -> Node:
+    def getSuccessorAtRandom(self) -> Node | None:
         if 0 == self.getNumSuccessors():
             return None
 
@@ -211,7 +209,7 @@ class BinomialNode(Node):
             raise ke
         return
 
-    def addSuccessor(self, successor: Node) -> None:
+    def addSuccessor(self, successor: Node | None) -> None:
         if successor is None:
             try:
                 # Check if None is already a successor
@@ -222,13 +220,13 @@ class BinomialNode(Node):
         self._successors.append(successor)
         return
 
-    def delLastSuccessor(self) -> Node:
+    def delLastSuccessor(self) -> Node | None:
         return self._successors.pop()
 
-    def getSuccessorAt(self, index: int) -> Node:
+    def getSuccessorAt(self, index: int) -> Node | None:
         return super().getSuccessorAt(index)
 
-    def getSuccessorAtRandom(self) -> Node:
+    def getSuccessorAtRandom(self) -> Node | None:
         """
         Returns:
           Node - A successor Node chosen according to the binomial
@@ -247,3 +245,5 @@ class BinomialNode(Node):
         for idx in range(numSuccessors):
             if p <= binom.cdf(idx, numSuccessors - 1, self._p):
                 return self._successors[idx]
+
+        return None

@@ -1,7 +1,7 @@
 import unittest
+from collections import defaultdict
 
 from absynthe.cfg import UniformNode
-from collections import defaultdict
 
 
 class UniformNodeTest(unittest.TestCase):

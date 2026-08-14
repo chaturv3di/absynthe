@@ -1,8 +1,9 @@
 import unittest
+from collections import defaultdict
+
 from scipy.stats import binom
 
 from absynthe.cfg import BinomialNode
-from collections import defaultdict
 
 
 class BinomialNodeTest(unittest.TestCase):
@@ -32,7 +33,8 @@ class BinomialNodeTest(unittest.TestCase):
         totalCount = numSucc * 5000
 
         succCount = defaultdict(int)
-        expectedIndividualCounts = [totalCount * binom.pmf(k, numSucc - 1, self.BinomialNode._p) for k in range(numSucc)]
+        expectedIndividualCounts = [totalCount * binom.pmf(k, numSucc - 1, self.BinomialNode._p)
+                                    for k in range(numSucc)]
         for _ in range(totalCount):
             succName = self.BinomialNode.getSuccessorAtRandom().getID()
             succCount[succName] += 1
