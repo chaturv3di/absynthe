@@ -163,31 +163,7 @@ methods, resulting in graphs with a mix of nodes.
 guaranteed between releases. However, inasmuch as users stick to graph builders'
 `generateNewGraph()` methods, they will stay away from compatibility problems.
 
-### Major changes in v0.1.0
-
-1. Repo revival and modernization: packaging migrated from `setup.py` to
-`pyproject.toml` (`hatchling`), dependency management via `uv`, `ruff` for
-linting/formatting, `mypy` for type checking, `pytest` for tests, GitHub
-Actions for CI, and a Trusted Publishing (OIDC) release flow to PyPI --
-replacing the old, manual `twine upload` process.
-2. Dropped support for `Python < 3.10`. `Python 3.10`-`3.13` are tested in CI.
-3. Merged in previously unreleased work from the `develop` branch: a new
-`MonospaceSimple` behavior class, and the `withSessionID` flag moved from
-`MonospaceInterleaving`'s constructor to its `synthesize()` method (breaking
-change for any existing callers of `MonospaceInterleaving.__init__`).
-4. Dropped the unused `numpy` dependency; `scipy` is now the only runtime
-dependency.
-
-### Major changes in v0.0.2
-
-1. Added new graph builders, viz. `DAGBuilder` and  `DCGBuilder`, which build
-CFGs with skip-level edges and loops respectively.
-2. Added new node, viz. `BinomialNode`, which exploits the binomial distribution
-in order to select its successors at the time of graph traversal.
-3. Added a separate utility class called `Utils` in `absynthe.cfg.utils.py` to
-create a new `Node` object from any of the concrete implementations of `Node` at
-random. All concrete implementations of `Node` therefore transparently available
-to graph builders (and everyone else) through this utility.
+See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 ### Coming up in future releases
 
