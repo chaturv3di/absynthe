@@ -23,8 +23,7 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
     # Instantiate a concrete behavior generator. Some
     # behavior generators do not print unique session ID
     # for each run, but it's nice to have those.
-    wSessionID: bool = True
-    testBehavior = MonospaceInterleaving(wSessionID)
+    testBehavior = MonospaceInterleaving()
 
     # Add multiple graphs to this behavior generator. The
     # behaviors that it will synthesize would essentially
@@ -37,8 +36,9 @@ def basicLogGeneration(numRoots: int = 2, numLeaves: int = 4,
 
     # Specify how many behaviors are to be synthesized,
     # and get going.
+    wSessionID: bool = True
     numTraversalsOfEachGraph: int = 2
-    for logLine in testBehavior.synthesize(numTraversalsOfEachGraph):
+    for logLine in testBehavior.synthesize(numTraversalsOfEachGraph, wSessionID):
         print(logLine)
     return
 
