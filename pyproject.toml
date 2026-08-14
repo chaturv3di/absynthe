@@ -43,6 +43,18 @@ pattern = "VERSION = ['\"](?P<version>[^'\"]+)['\"]"
 [tool.hatch.build.targets.wheel]
 packages = ["absynthe"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+    "/absynthe",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+]
+exclude = [
+    "/tests/resources/*.gv",
+    "/tests/resources/*.log",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
