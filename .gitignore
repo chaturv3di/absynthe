@@ -60,5 +60,8 @@ coverage.xml
 # pyenv
 .python-version
 
+# uv
+.venv/
+
 # mkdocs documentation
 /site
