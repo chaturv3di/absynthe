@@ -1,4 +1,6 @@
 [![CI](https://github.com/chaturv3di/absynthe/actions/workflows/ci.yml/badge.svg)](https://github.com/chaturv3di/absynthe/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/absynthe.svg)](https://pypi.org/project/absynthe/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/absynthe.svg)](https://pypi.org/project/absynthe/)
 
 # Absynthe: A (branching) Behavior Synthesizer
 
