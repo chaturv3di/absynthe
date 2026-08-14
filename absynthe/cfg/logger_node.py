@@ -1,13 +1,11 @@
-from __future__ import print_function
 
 # Imports for LoggerNode
-from .node import Node
-
 from abc import abstractmethod
-from sys import stderr
-from typing import List
-from random import randint
 from importlib import import_module
+from random import randint
+from sys import stderr
+
+from .node import Node
 
 
 class LoggerNode(Node):
@@ -65,7 +63,7 @@ class LoggerNode(Node):
         nodeModule = import_module("absynthe.cfg.node")
 
         # 1. Try to initialise the core node of this object
-        self._coreNode: Node = None
+        self._coreNode: Node
         try:
             className = kwargs[LoggerNode.KW_CORE_CLASS_NAME]
         except KeyError as ke:
@@ -105,14 +103,14 @@ class LoggerNode(Node):
         self._coreNode.printDebugInfo(verbose, printPrefix)
         return
 
-    def addSuccessor(self, successor: Node):
+    def addSuccessor(self, successor: Node | None):
         """
         Override abstract method by delegating to core node.
         """
         self._coreNode.addSuccessor(successor)
         return
 
-    def delLastSuccessor(self) -> Node:
+    def delLastSuccessor(self) -> Node | None:
         """
         Override abstract method by delegating to core node.
         """
@@ -124,20 +122,20 @@ class LoggerNode(Node):
         """
         return self._coreNode.getNumSuccessors()
 
-    def getSuccessorAt(self, index: int) -> Node:
+    def getSuccessorAt(self, index: int) -> Node | None:
         """
         Override abstract method by delegating to core node.
         """
         return self._coreNode.getSuccessorAt(index)
 
-    def getSuccessorAtRandom(self) -> Node:
+    def getSuccessorAtRandom(self) -> Node | None:
         """
         Override abstract method by delegating to core node.
         """
         return self._coreNode.getSuccessorAtRandom()
 
     @abstractmethod
-    def logInfo(self, timeStamp: str, params: List[str]) -> str:
+    def logInfo(self, timeStamp: str, params: list[str] | None) -> str:
         """
         Create a log message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to
@@ -155,7 +153,7 @@ class LoggerNode(Node):
         pass
 
     @abstractmethod
-    def logError(self, timeStamp: str, params: List[str]) -> str:
+    def logError(self, timeStamp: str, params: list[str] | None) -> str:
         """
         Create an error message comprising of some fixed part and some variable part.
         The fixed part (i.e. the subseqeuence defining the log signature) ought to be
@@ -182,7 +180,7 @@ class SimpleLoggerNode(LoggerNode):
 
     def __init__(self, id: str, **kwargs: str) -> None:
         super().__init__(id, **kwargs)
-        meta: str = None
+        meta: str | None = None
         try:
             meta = kwargs[SimpleLoggerNode.KW_PREFIX]
         except KeyError:
@@ -219,20 +217,20 @@ class SimpleLoggerNode(LoggerNode):
 
         return "".join(fixedMesgList)
 
-    def logInfo(self, timeStamp: str, params: List[str]) -> str:
+    def logInfo(self, timeStamp: str, params: list[str] | None) -> str:
         """
         Override abstract method of super class
         """
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_INFO)
 
-    def logError(self, timeStamp: str, params: List[str]) -> str:
+    def logError(self, timeStamp: str, params: list[str] | None) -> str:
         """
         Override abstract method of super class
         """
         return self._createMesg(timeStamp, params, LoggerNode.MESG_TYPE_ERR)
 
     def _createMesg(self, timeStamp: str,
-                    params: List[str],
+                    params: list[str] | None,
                     mesgType: str = LoggerNode.MESG_TYPE_INFO) -> str:
         mesgList = list()
         if mesgType == LoggerNode.MESG_TYPE_INFO:

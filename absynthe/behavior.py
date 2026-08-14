@@ -1,12 +1,10 @@
-from __future__ import print_function
-from typing import List
-from random import randint, sample
-from datetime import datetime
-
-from .cfg import LoggerNode, Graph
-
 # Imports for Behavior
 from abc import ABC, abstractmethod
+from datetime import datetime
+from random import randint, sample
+from typing import cast
+
+from .cfg import Graph, LoggerNode
 
 
 class Behavior(ABC):
@@ -22,8 +20,8 @@ class Behavior(ABC):
 
 class MonospaceSimple(Behavior):
 
-    def __init__(self):
-        self._cfgList: List[Graph] = list()
+    def __init__(self) -> None:
+        self._cfgList: list[Graph] = list()
         self._fixedTimeDelta: float = 0.05
         return
 
@@ -36,11 +34,11 @@ class MonospaceSimple(Behavior):
         graphIdx: int = -1
         wallClock: float = -2.5
         for i in range(numRuns):  # Complete a traversal of each graph
-            graphOrder: List[int] = sample(range(numGraphs), numGraphs)
+            graphOrder: list[int] = sample(range(numGraphs), numGraphs)
             wallClock += 2.5  # Adding time delay between successive runs
             for graphIdx in graphOrder:
                 graph: Graph = self._cfgList[graphIdx]
-                node: LoggerNode = graph.getRootAtRandom()
+                node: LoggerNode | None = cast(LoggerNode, graph.getRootAtRandom())
 
                 while node is not None:
                     timeStamp: str = str(datetime.fromtimestamp(wallClock))
@@ -54,13 +52,13 @@ class MonospaceSimple(Behavior):
                     yield node.logInfo(logPrefix, None)
 
                     wallClock += self._fixedTimeDelta
-                    node = node.getSuccessorAtRandom()
+                    node = cast("LoggerNode | None", node.getSuccessorAtRandom())
 
 
 class MonospaceInterleaving(Behavior):
 
-    def __init__(self):
-        self._cfgList: List[Graph] = list()
+    def __init__(self) -> None:
+        self._cfgList: list[Graph] = list()
         self._fixedTimeDelta: float = 0.05
         return
 
@@ -70,11 +68,12 @@ class MonospaceInterleaving(Behavior):
 
     def synthesize(self, numRuns: int = 100, withSessionID: bool = False):
         numGraphs: int = len(self._cfgList)
-        nextNodeOf: List[LoggerNode] = None
+        nextNodeOf: list[LoggerNode | None] | None = None
         graphIdx: int = -1
         wallClock: float = -2.5
         for i in range(numRuns):  # Complete a traversal of each graph
-            nextNodeOf = [self._cfgList[i].getRootAtRandom() for i in range(numGraphs)]
+            nextNodeOf = [cast(LoggerNode, self._cfgList[i].getRootAtRandom())
+                         for i in range(numGraphs)]
             graphsAvailable = list(range(numGraphs))  # Shrinks as we reach the leaf of a graph
             toTraverse: int = numGraphs
             wallClock += 2.5  # Adding time delay between successive runs
@@ -83,7 +82,7 @@ class MonospaceInterleaving(Behavior):
                 # randomly choose a graph among those whose leaves
                 # have not yet been reached in this run.
                 posInGraphsAvailable: int = randint(0, toTraverse - 1)
-                graphIdx: int = graphsAvailable[posInGraphsAvailable]
+                graphIdx = graphsAvailable[posInGraphsAvailable]
                 graph: Graph = self._cfgList[graphIdx]
 
                 timeStamp: str = str(datetime.fromtimestamp(wallClock))
@@ -94,11 +93,12 @@ class MonospaceInterleaving(Behavior):
                 # For the sake of better readability of logs, append
                 # graph ID to the time stamp.
                 logPrefix: str = " ".join([timeStamp, sessionID, graph.getID()])
-                node: LoggerNode = nextNodeOf[graphIdx]
+                node: LoggerNode = cast(LoggerNode, nextNodeOf[graphIdx])
                 yield node.logInfo(logPrefix, None)
 
                 wallClock += self._fixedTimeDelta
-                nextNode: LoggerNode = node.getSuccessorAtRandom()
+                nextNode: LoggerNode | None = cast("LoggerNode | None",
+                                                   node.getSuccessorAtRandom())
                 nextNodeOf[graphIdx] = nextNode
                 if nextNode is None:
                     _ = graphsAvailable.pop(posInGraphsAvailable)

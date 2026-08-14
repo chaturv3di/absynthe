@@ -1,11 +1,8 @@
-from __future__ import print_function
 from abc import ABC
-from typing import List
-from random import randint
 from importlib import import_module
+from random import randint
 
-from absynthe.cfg import BinomialNode
-from absynthe.cfg import LoggerNode
+from absynthe.cfg import BinomialNode, LoggerNode
 
 
 class Utils(ABC):
@@ -30,8 +27,8 @@ class Utils(ABC):
 
     @staticmethod
     def newRandomNode(nodeID: str,
-                      loggerNodeOptions: List[str],
-                      coreNodeOptions: List[str]) -> LoggerNode:
+                      loggerNodeOptions: list[str],
+                      coreNodeOptions: list[str]) -> LoggerNode:
         """
         Instantiates an object of one of the concrete Node classes, wraps it
         inside one of the concrete LoggerNode classes, and returns the

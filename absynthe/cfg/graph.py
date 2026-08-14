@@ -1,12 +1,11 @@
-from __future__ import print_function
+from random import randint
 from sys import stderr
-from typing import TextIO, List, Tuple
+from typing import TextIO, cast
 
 from .node import Node
-from random import randint
 
 
-class Graph(object):
+class Graph:
     """
     The Graph class. Can have multiple root nodes; and it suffices
     for objects of this class to only keep track of the root nodes.
@@ -30,7 +29,7 @@ class Graph(object):
         """
         self._id = id
         self._numRoots = numRoots
-        self._roots = []
+        self._roots: list[Node] = []
         return
 
     def addRoot(self, root: Node):
@@ -102,7 +101,7 @@ class Graph(object):
         count = 1
 
         for i in range(node.getNumSuccessors()):
-            count += self._bfsAndCount(node.getSuccessorAt(i))
+            count += self._bfsAndCount(cast(Node, node.getSuccessorAt(i)))
         return count
 
     def size(self) -> int:
@@ -113,13 +112,13 @@ class Graph(object):
                then this method will not produce expected result.
         """
         size = 0
-        self._nodeDict = dict()
+        self._nodeDict: dict[str, bool] = dict()
         for r in self._roots:
             if r is not None:
                 size += self._bfsAndCount(r)
         return size
 
-    def _bfsAndAdd(self, node: Node, transitionList: List[Tuple[str, str]]) -> None:
+    def _bfsAndAdd(self, node: Node, transitionList: list[tuple[str, str]]) -> None:
         nodeID = node.getID()
         try:
             _ = self._nodeDict[nodeID]
@@ -129,7 +128,7 @@ class Graph(object):
             pass
 
         for i in range(node.getNumSuccessors()):
-            succNode: Node = node.getSuccessorAt(i)
+            succNode: Node = cast(Node, node.getSuccessorAt(i))
             succNodeID = succNode.getID()
             transitionList.append((nodeID, succNodeID))
             self._bfsAndAdd(succNode, transitionList)
@@ -143,13 +142,13 @@ class Graph(object):
           fp(typing.TextIO): A text file stream that can be written to.
         """
         self._nodeDict = dict()
-        transitionList: List[Tuple[str, str]] = list()
+        transitionList: list[tuple[str, str]] = list()
 
         for r in self._roots:
             if r is not None:
                 self._bfsAndAdd(r, transitionList)
 
-        fileContent: List[str] = ["digraph \""]
+        fileContent: list[str] = ["digraph \""]
         fileContent.append(self._id)
         fileContent.append("\" {\n")
 

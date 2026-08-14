@@ -1,8 +1,8 @@
+import os
 import unittest
 
-from absynthe.graph_builder import TreeBuilder, DAGBuilder, DCGBuilder
 from absynthe.cfg import Graph
-import os
+from absynthe.graph_builder import DAGBuilder, DCGBuilder, TreeBuilder
 
 
 class TreeBuilderTest(unittest.TestCase):

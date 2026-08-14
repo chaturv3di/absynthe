@@ -1,8 +1,8 @@
-import unittest
 import os
+import unittest
 
-from absynthe.graph_builder import TreeBuilder, DCGBuilder
-from absynthe.behavior import MonospaceSimple, MonospaceInterleaving
+from absynthe.behavior import MonospaceInterleaving, MonospaceSimple
+from absynthe.graph_builder import DCGBuilder, TreeBuilder
 
 
 class test_monospaceSimple(unittest.TestCase):
