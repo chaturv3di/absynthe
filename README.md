@@ -74,11 +74,9 @@ below.
 
 ## Installation
 
-This package has been developed with `Python 3.6.*` and depends on `scipy 1.2.1`.
-Things might not work with `Python 3.7.*` or `scipy 1.3.*`. Therefore, consider
-creating a virtual environment if your default configuration differs.
+This package requires `Python >= 3.10` and depends on `scipy`.
 
-The latest release is available on PyPi, simply `pip install absynthe`.
+The latest release is available on PyPI, simply `pip install absynthe`.
 
 The `main` branch of this repository always contains the latest source, including any
 changes merged since the last tagged release. To install from source:
@@ -87,10 +85,7 @@ changes merged since the last tagged release. To install from source:
 # Change dir to absynthe
 cd /path/to/absynthe
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Install absynthe
+# Install absynthe and its dependencies
 pip install .
 ```
 
@@ -165,6 +160,21 @@ methods, resulting in graphs with a mix of nodes.
 **Note:** This tool is still in alpha stage, so backward compatibility is not
 guaranteed between releases. However, inasmuch as users stick to graph builders'
 `generateNewGraph()` methods, they will stay away from compatibility problems.
+
+### Major changes in v0.1.0
+
+1. Repo revival and modernization: packaging migrated from `setup.py` to
+`pyproject.toml` (`hatchling`), dependency management via `uv`, `ruff` for
+linting/formatting, `mypy` for type checking, `pytest` for tests, GitHub
+Actions for CI, and a Trusted Publishing (OIDC) release flow to PyPI --
+replacing the old, manual `twine upload` process.
+2. Dropped support for `Python < 3.10`. `Python 3.10`-`3.13` are tested in CI.
+3. Merged in previously unreleased work from the `develop` branch: a new
+`MonospaceSimple` behavior class, and the `withSessionID` flag moved from
+`MonospaceInterleaving`'s constructor to its `synthesize()` method (breaking
+change for any existing callers of `MonospaceInterleaving.__init__`).
+4. Dropped the unused `numpy` dependency; `scipy` is now the only runtime
+dependency.
 
 ### Major changes in v0.0.2
 
