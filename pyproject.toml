@@ -28,9 +28,18 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/chaturv3di/absynthe/"
 
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
 [tool.hatch.version]
 path = "absynthe/version.py"
 pattern = "VERSION = ['\"](?P<version>[^'\"]+)['\"]"
 
 [tool.hatch.build.targets.wheel]
 packages = ["absynthe"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
