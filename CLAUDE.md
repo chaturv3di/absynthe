@@ -111,8 +111,10 @@ This repo uses GitHub flow (single `main` branch), not git-flow. When creating a
   1. Create a `release/vX.Y.Z` branch from `main`.
   2. Commit the version bump — update `VERSION` in `absynthe/version.py` only; `pyproject.toml` reads
      the version dynamically from that file via hatchling, so it does not need a separate edit.
-  3. In `README.md`'s `## Release Notes` section: add a new `### Major changes in vX.Y.Z` entry
-     summarizing what changed since the last release.
+  3. Add a new `## [X.Y.Z] - YYYY-MM-DD` entry to `CHANGELOG.md` (Keep a Changelog format)
+     summarizing what changed since the last release, plus its compare-link reference at the bottom
+     of the file. `README.md`'s Release Notes section just links to `CHANGELOG.md` — don't duplicate
+     entries there.
   4. Push the branch and open a PR into `main`.
   5. Wait for PR approval and merge — do NOT proceed until the PR is merged.
   6. After merge, create an annotated tag on `main`: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
